@@ -3,32 +3,183 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Carrito de Compras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito - FitZone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; }
+    .container { max-width: 900px; margin: 2rem auto; padding: 1rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #800020; }
+    .product { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 1rem 0; }
+    .product img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; }
+    .product-info { flex: 1; padding: 0 1rem; }
+    .product-actions input { width: 40px; text-align: center; }
+    .totals, .payment, .formulario { margin-top: 2rem; }
+    .totals div, .payment label { margin: 0.5rem 0; }
+    .btn { background: #800020; color: #fff; border: none; padding: 0.8rem 1.2rem; cursor: pointer; border-radius: 5px; }
+    .toast { position: fixed; bottom: 1rem; right: 1rem; background: #333; color: white; padding: 1rem; border-radius: 6px; opacity: 0.95; }
+    input, textarea, select { width: 100%; padding: 0.6rem; margin-top: 0.5rem; border-radius: 4px; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
-  <form id="checkout-form">
-        <div class="form-group">
-            <label for="cliente-nombre">Nombre:</label>
-            <input type="text" id="cliente-nombre" placeholder="Tu nombre" required>
-        </div>
-        <div class="form-group">
-            <label for="cliente-telefono">Teléfono:</label>
-            <input type="text" id="cliente-telefono" placeholder="Tu número" required>
-        </div>
-        <div class="form-group">
-            <label for="cliente-direccion">Dirección o Google Maps:</label>
-            <input type="text" id="cliente-direccion" placeholder="Dirección o link de Maps" required>
-        </div>
-    
-    <!-- Campos del formulario se insertarán aquí -->
-  </form>
+  <div class="container">
+    <h1>Tu Carrito</h1>
+    <div id="cart-items"></div>
 
-  <select id="metodo-pago">
-    <option value="efectivo">Efectivo</option>
-    <option value="transferencia">Transferencia</option>
-    <option value="exterior">Pago en el Exterior</option>
-  </select>
+    <div class="totals">
+      <div><strong>Subtotal:</strong> $<span id="subtotal">0.00</span></div>
+      <div><strong>Descuento:</strong> -$<span id="discount">0.00</span></div>
+      <div><strong>Total:</strong> $<span id="total">0.00</span></div>
+    </div>
 
-  <a id="whatsapp-link" href="https://wa.me/5353264753">Enviar por WhatsApp</a>
+    <div class="promo">
+      <input type="text" id="promo-code" placeholder="Código promocional" />
+      <button class="btn" onclick="applyPromo()">Aplicar</button>
+    </div>
+
+    <div class="formulario">
+      <h3>Datos del Cliente</h3>
+      <label>Nombre completo:<input type="text" id="cliente-nombre" /></label>
+      <label>Teléfono de contacto:<input type="text" id="cliente-telefono" /></label>
+      <label>Dirección o link de Google Maps:<textarea id="cliente-direccion"></textarea></label>
+      <label>Nota adicional:<textarea id="nota-cliente" placeholder="Ej: Entregar en horario de la tarde..."></textarea></label>
+    </div>
+
+    <div class="payment">
+      <h3>Método de pago</h3>
+      <label><input type="radio" name="pago" value="Efectivo (USD)" checked /> Efectivo (USD)</label>
+      <label><input type="radio" name="pago" value="Efectivo (CUP)" /> Efectivo (CUP)</label>
+      <label><input type="radio" name="pago" value="Transferencia (CUP)" /> Transferencia (CUP)</label>
+      <label><input type="radio" name="pago" value="Transferencia (MLC)" /> Transferencia (MLC)</label>
+      <label><input type="radio" name="pago" value="Pago en el Exterior" /> Pago en el Exterior</label>
+    </div>
+
+    <button class="btn" onclick="sendOrder()">Enviar pedido por WhatsApp</button>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script>
+    const cartItemsContainer = document.getElementById('cart-items');
+    const subtotalEl = document.getElementById('subtotal');
+    const discountEl = document.getElementById('discount');
+    const totalEl = document.getElementById('total');
+    const toastContainer = document.getElementById('toast-container');
+
+    const promos = {
+      FIT10: 10, // 10%
+      DESCUENTO5: 5, // $5
+    };
+    let descuentoAplicado = 0;
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = msg;
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem('fz-cart') || '[]');
+      cartItemsContainer.innerHTML = '';
+      let subtotal = 0;
+      cart.forEach((item, i) => {
+        const total = item.price * item.qty;
+        subtotal += total;
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+          <img src="${item.image}" onclick="zoomImage('${item.image}')" />
+          <div class="product-info">
+            <div><strong>${item.name}</strong></div>
+            <small>${item.description || ''}</small>
+            <div>$${item.price.toFixed(2)} x 
+              <input type="number" min="1" value="${item.qty}" onchange="updateQty(${i}, this.value)" /> = $${total.toFixed(2)}</div>
+          </div>
+          <button class="btn" onclick="removeItem(${i})">Eliminar</button>`;
+        cartItemsContainer.appendChild(div);
+      });
+      subtotalEl.textContent = subtotal.toFixed(2);
+      updateTotal(subtotal);
+    }
+
+    function updateQty(i, qty) {
+      const cart = JSON.parse(localStorage.getItem('fz-cart'));
+      cart[i].qty = parseInt(qty);
+      localStorage.setItem('fz-cart', JSON.stringify(cart));
+      loadCart();
+    }
+
+    function removeItem(i) {
+      const cart = JSON.parse(localStorage.getItem('fz-cart'));
+      cart.splice(i, 1);
+      localStorage.setItem('fz-cart', JSON.stringify(cart));
+      loadCart();
+    }
+
+    function applyPromo() {
+      const code = document.getElementById('promo-code').value.trim().toUpperCase();
+      const subtotal = parseFloat(subtotalEl.textContent);
+      if (promos[code] !== undefined) {
+        const val = promos[code];
+        descuentoAplicado = val <= 1 ? subtotal * val : val > 1 && val < 100 ? subtotal * (val / 100) : val;
+        showToast(`Código aplicado: -$${descuentoAplicado.toFixed(2)}`);
+      } else {
+        descuentoAplicado = 0;
+        showToast('Código no válido');
+      }
+      updateTotal(subtotal);
+    }
+
+    function updateTotal(subtotal) {
+      discountEl.textContent = descuentoAplicado.toFixed(2);
+      totalEl.textContent = (subtotal - descuentoAplicado).toFixed(2);
+    }
+
+    function sendOrder() {
+      const cart = JSON.parse(localStorage.getItem('fz-cart') || '[]');
+      if (!cart.length) return showToast('El carrito está vacío');
+      const nombre = document.getElementById('cliente-nombre').value.trim();
+      const tel = document.getElementById('cliente-telefono').value.trim();
+      const dir = document.getElementById('cliente-direccion').value.trim();
+      const nota = document.getElementById('nota-cliente').value.trim();
+      const metodo = document.querySelector('input[name="pago"]:checked').value;
+
+      let msg = `*Nuevo pedido desde FitZone*%0A`;
+      msg += `------------------------%0A`;
+      cart.forEach(p => {
+        msg += `• ${p.name} - $${p.price} x ${p.qty}%0A`;
+      });
+      msg += `------------------------%0A`;
+      msg += `*Subtotal:* $${subtotalEl.textContent}%0A`;
+      msg += `*Descuento:* $${discountEl.textContent}%0A`;
+      msg += `*Total a pagar:* $${totalEl.textContent}%0A`;
+      msg += `*Método de pago:* ${metodo}%0A`;
+      msg += `*Nombre:* ${nombre}%0A`;
+      msg += `*Teléfono:* ${tel}%0A`;
+      msg += `*Dirección:* ${dir}%0A`;
+      if (nota) msg += `*Nota:* ${nota}%0A`;
+      window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
+    }
+
+    function zoomImage(src) {
+      const img = document.createElement('img');
+      img.src = src;
+      Object.assign(img.style, {
+        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+        maxWidth: '90%', maxHeight: '90%', zIndex: 1001, boxShadow: '0 0 20px rgba(0,0,0,0.5)'
+      });
+      const overlay = document.createElement('div');
+      Object.assign(overlay.style, {
+        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+        background: 'rgba(0,0,0,0.6)', zIndex: 1000
+      });
+      overlay.onclick = () => { overlay.remove(); img.remove(); };
+      document.body.append(overlay, img);
+    }
+
+    loadCart();
+  </script>
 </body>
 </html>
