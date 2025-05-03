@@ -3,183 +3,205 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carrito - FitZone</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Carrito FitZone</title>
   <style>
-    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; }
-    .container { max-width: 900px; margin: 2rem auto; padding: 1rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #800020; }
-    .product { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 1rem 0; }
-    .product img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; }
-    .product-info { flex: 1; padding: 0 1rem; }
-    .product-actions input { width: 40px; text-align: center; }
-    .totals, .payment, .formulario { margin-top: 2rem; }
-    .totals div, .payment label { margin: 0.5rem 0; }
-    .btn { background: #800020; color: #fff; border: none; padding: 0.8rem 1.2rem; cursor: pointer; border-radius: 5px; }
-    .toast { position: fixed; bottom: 1rem; right: 1rem; background: #333; color: white; padding: 1rem; border-radius: 6px; opacity: 0.95; }
-    input, textarea, select { width: 100%; padding: 0.6rem; margin-top: 0.5rem; border-radius: 4px; border: 1px solid #ccc; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdfdfd;
+      color: #222;
+      padding: 20px;
+    }
+    .carrito {
+      max-width: 800px;
+      margin: auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #800020;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: right;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+    .btn {
+      background: #800020;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .mensaje {
+      color: green;
+      margin: 10px 0;
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Tu Carrito</h1>
-    <div id="cart-items"></div>
+  <div class="carrito">
+    <h2>Carrito de Compras FitZone</h2>
+    <div id="mensaje" class="mensaje">Producto añadido al carrito.</div>
+    <table id="tabla-carrito">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-    <div class="totals">
-      <div><strong>Subtotal:</strong> $<span id="subtotal">0.00</span></div>
-      <div><strong>Descuento:</strong> -$<span id="discount">0.00</span></div>
-      <div><strong>Total:</strong> $<span id="total">0.00</span></div>
+    <div class="total">
+      Subtotal: $<span id="subtotal">0.00</span><br>
+      Descuento: -$<span id="descuento">0.00</span><br>
+      Total a pagar: $<span id="total">0.00</span>
     </div>
 
-    <div class="promo">
-      <input type="text" id="promo-code" placeholder="Código promocional" />
-      <button class="btn" onclick="applyPromo()">Aplicar</button>
-    </div>
+    <label for="codigo">Código promocional:</label>
+    <input type="text" id="codigo" placeholder="Ingresa tu código">
+    <button class="btn" onclick="aplicarCodigo()">Aplicar</button>
 
-    <div class="formulario">
-      <h3>Datos del Cliente</h3>
-      <label>Nombre completo:<input type="text" id="cliente-nombre" /></label>
-      <label>Teléfono de contacto:<input type="text" id="cliente-telefono" /></label>
-      <label>Dirección o link de Google Maps:<textarea id="cliente-direccion"></textarea></label>
-      <label>Nota adicional:<textarea id="nota-cliente" placeholder="Ej: Entregar en horario de la tarde..."></textarea></label>
-    </div>
+    <h3>Datos del Cliente</h3>
+    <input type="text" id="cliente-nombre" placeholder="Nombre completo">
+    <input type="text" id="cliente-telefono" placeholder="Número de teléfono">
+    <input type="text" id="cliente-direccion" placeholder="Dirección o enlace de Google Maps">
+    <textarea id="cliente-nota" placeholder="Nota adicional (opcional)" rows="3" style="width:100%;"></textarea>
 
-    <div class="payment">
-      <h3>Método de pago</h3>
-      <label><input type="radio" name="pago" value="Efectivo (USD)" checked /> Efectivo (USD)</label>
-      <label><input type="radio" name="pago" value="Efectivo (CUP)" /> Efectivo (CUP)</label>
-      <label><input type="radio" name="pago" value="Transferencia (CUP)" /> Transferencia (CUP)</label>
-      <label><input type="radio" name="pago" value="Transferencia (MLC)" /> Transferencia (MLC)</label>
-      <label><input type="radio" name="pago" value="Pago en el Exterior" /> Pago en el Exterior</label>
-    </div>
+    <label for="pago">Método de pago:</label>
+    <select id="pago">
+      <option>Efectivo (USD)</option>
+      <option>Efectivo (CUP)</option>
+      <option>Transferencia (CUP)</option>
+      <option>Transferencia (MLC)</option>
+      <option>Pago en el Exterior (Zelle)</option>
+    </select>
 
-    <button class="btn" onclick="sendOrder()">Enviar pedido por WhatsApp</button>
+    <button class="btn" onclick="enviarPedido()">Enviar pedido por WhatsApp</button>
   </div>
 
-  <div id="toast-container"></div>
-
   <script>
-    const cartItemsContainer = document.getElementById('cart-items');
-    const subtotalEl = document.getElementById('subtotal');
-    const discountEl = document.getElementById('discount');
-    const totalEl = document.getElementById('total');
-    const toastContainer = document.getElementById('toast-container');
-
-    const promos = {
-      FIT10: 10, // 10%
-      DESCUENTO5: 5, // $5
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    let descuentos = {
+      'DESCUENTO10': 10,
+      'FITO5': 5
     };
     let descuentoAplicado = 0;
 
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = msg;
-      toastContainer.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    function loadCart() {
-      const cart = JSON.parse(localStorage.getItem('fz-cart') || '[]');
-      cartItemsContainer.innerHTML = '';
+    function actualizarCarrito() {
+      const tabla = document.querySelector("#tabla-carrito tbody");
+      tabla.innerHTML = "";
       let subtotal = 0;
-      cart.forEach((item, i) => {
-        const total = item.price * item.qty;
-        subtotal += total;
-        const div = document.createElement('div');
-        div.className = 'product';
-        div.innerHTML = `
-          <img src="${item.image}" onclick="zoomImage('${item.image}')" />
-          <div class="product-info">
-            <div><strong>${item.name}</strong></div>
-            <small>${item.description || ''}</small>
-            <div>$${item.price.toFixed(2)} x 
-              <input type="number" min="1" value="${item.qty}" onchange="updateQty(${i}, this.value)" /> = $${total.toFixed(2)}</div>
-          </div>
-          <button class="btn" onclick="removeItem(${i})">Eliminar</button>`;
-        cartItemsContainer.appendChild(div);
+
+      carrito.forEach((item, i) => {
+        const fila = document.createElement("tr");
+        const sub = item.precio * item.cantidad;
+        subtotal += sub;
+
+        fila.innerHTML = `
+          <td>${item.nombre}</td>
+          <td>$${item.precio.toFixed(2)}</td>
+          <td>
+            <input type="number" min="1" value="${item.cantidad}" onchange="cambiarCantidad(${i}, this.value)">
+          </td>
+          <td>$${sub.toFixed(2)}</td>
+          <td><button onclick="eliminar(${i})">Eliminar</button></td>
+        `;
+        tabla.appendChild(fila);
       });
-      subtotalEl.textContent = subtotal.toFixed(2);
-      updateTotal(subtotal);
+
+      const total = subtotal - descuentoAplicado;
+      document.getElementById("subtotal").textContent = subtotal.toFixed(2);
+      document.getElementById("descuento").textContent = descuentoAplicado.toFixed(2);
+      document.getElementById("total").textContent = total.toFixed(2);
+
+      localStorage.setItem("carrito", JSON.stringify(carrito));
     }
 
-    function updateQty(i, qty) {
-      const cart = JSON.parse(localStorage.getItem('fz-cart'));
-      cart[i].qty = parseInt(qty);
-      localStorage.setItem('fz-cart', JSON.stringify(cart));
-      loadCart();
+    function cambiarCantidad(i, cantidad) {
+      carrito[i].cantidad = parseInt(cantidad);
+      actualizarCarrito();
     }
 
-    function removeItem(i) {
-      const cart = JSON.parse(localStorage.getItem('fz-cart'));
-      cart.splice(i, 1);
-      localStorage.setItem('fz-cart', JSON.stringify(cart));
-      loadCart();
+    function eliminar(i) {
+      carrito.splice(i, 1);
+      actualizarCarrito();
     }
 
-    function applyPromo() {
-      const code = document.getElementById('promo-code').value.trim().toUpperCase();
-      const subtotal = parseFloat(subtotalEl.textContent);
-      if (promos[code] !== undefined) {
-        const val = promos[code];
-        descuentoAplicado = val <= 1 ? subtotal * val : val > 1 && val < 100 ? subtotal * (val / 100) : val;
-        showToast(`Código aplicado: -$${descuentoAplicado.toFixed(2)}`);
+    function aplicarCodigo() {
+      const codigo = document.getElementById("codigo").value.toUpperCase();
+      if (descuentos[codigo]) {
+        descuentoAplicado = descuentos[codigo];
+        alert("Código aplicado: $" + descuentoAplicado);
       } else {
         descuentoAplicado = 0;
-        showToast('Código no válido');
+        alert("Código no válido.");
       }
-      updateTotal(subtotal);
+      actualizarCarrito();
     }
 
-    function updateTotal(subtotal) {
-      discountEl.textContent = descuentoAplicado.toFixed(2);
-      totalEl.textContent = (subtotal - descuentoAplicado).toFixed(2);
-    }
+    function enviarPedido() {
+      const nombre = document.getElementById("cliente-nombre").value;
+      const tel = document.getElementById("cliente-telefono").value;
+      const dir = document.getElementById("cliente-direccion").value;
+      const nota = document.getElementById("cliente-nota").value;
+      const pago = document.getElementById("pago").value;
 
-    function sendOrder() {
-      const cart = JSON.parse(localStorage.getItem('fz-cart') || '[]');
-      if (!cart.length) return showToast('El carrito está vacío');
-      const nombre = document.getElementById('cliente-nombre').value.trim();
-      const tel = document.getElementById('cliente-telefono').value.trim();
-      const dir = document.getElementById('cliente-direccion').value.trim();
-      const nota = document.getElementById('nota-cliente').value.trim();
-      const metodo = document.querySelector('input[name="pago"]:checked').value;
-
-      let msg = `*Nuevo pedido desde FitZone*%0A`;
-      msg += `------------------------%0A`;
-      cart.forEach(p => {
-        msg += `• ${p.name} - $${p.price} x ${p.qty}%0A`;
+      let mensaje = `*Pedido FitZone*%0A`;
+      carrito.forEach(p => {
+        mensaje += `- ${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toFixed(2)}%0A`;
       });
-      msg += `------------------------%0A`;
-      msg += `*Subtotal:* $${subtotalEl.textContent}%0A`;
-      msg += `*Descuento:* $${discountEl.textContent}%0A`;
-      msg += `*Total a pagar:* $${totalEl.textContent}%0A`;
-      msg += `*Método de pago:* ${metodo}%0A`;
-      msg += `*Nombre:* ${nombre}%0A`;
-      msg += `*Teléfono:* ${tel}%0A`;
-      msg += `*Dirección:* ${dir}%0A`;
-      if (nota) msg += `*Nota:* ${nota}%0A`;
-      window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
+      mensaje += `%0ASubtotal: $${document.getElementById("subtotal").textContent}`;
+      mensaje += `%0ADescuento: $${document.getElementById("descuento").textContent}`;
+      mensaje += `%0ATotal: $${document.getElementById("total").textContent}`;
+      mensaje += `%0A%0A*Datos del cliente:*%0ANombre: ${nombre}%0ATeléfono: ${tel}%0ADirección: ${dir}%0ANota: ${nota}`;
+      mensaje += `%0AForma de pago: ${pago}`;
+
+      window.open(`https://wa.me/5353264753?text=${mensaje}`, '_blank');
     }
 
-    function zoomImage(src) {
-      const img = document.createElement('img');
-      img.src = src;
-      Object.assign(img.style, {
-        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-        maxWidth: '90%', maxHeight: '90%', zIndex: 1001, boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-      });
-      const overlay = document.createElement('div');
-      Object.assign(overlay.style, {
-        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-        background: 'rgba(0,0,0,0.6)', zIndex: 1000
-      });
-      overlay.onclick = () => { overlay.remove(); img.remove(); };
-      document.body.append(overlay, img);
+    function mostrarMensaje() {
+      const mensaje = document.getElementById("mensaje");
+      mensaje.style.display = "block";
+      setTimeout(() => mensaje.style.display = "none", 3000);
     }
 
-    loadCart();
+    function agregarProducto(nombre, precio) {
+      const existente = carrito.find(p => p.nombre === nombre);
+      if (existente) {
+        existente.cantidad += 1;
+      } else {
+        carrito.push({ nombre, precio, cantidad: 1 });
+      }
+      mostrarMensaje();
+      actualizarCarrito();
+    }
+
+    window.onload = actualizarCarrito;
   </script>
 </body>
 </html>
