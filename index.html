@@ -6,202 +6,121 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Carrito FitZone</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #fdfdfd;
-      color: #222;
-      padding: 20px;
-    }
-    .carrito {
-      max-width: 800px;
-      margin: auto;
-      border: 1px solid #ccc;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #800020;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 16px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
-    .total {
-      font-weight: bold;
-      font-size: 1.2em;
-      text-align: right;
-    }
-    input[type="text"], input[type="number"], select {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-    }
-    .btn {
-      background: #800020;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin-top: 10px;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-    .mensaje {
-      color: green;
-      margin: 10px 0;
-      display: none;
-    }
+    body { font-family: Arial, sans-serif; background: #fdfdfd; color: #222; padding: 20px; }
+    .carrito { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    h2 { color: #800020; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-bottom: 20px; }
+    input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px; margin: 8px 0; border-radius: 4px; border: 1px solid #ccc; }
+    .btn { background: #800020; color: white; border: none; padding: 10px 20px; margin-top: 10px; cursor: pointer; border-radius: 8px; display: block; width: 100%; font-size: 1em; }
+    .mensaje { color: #4caf50; margin: 10px 0; display: none; text-align: center; }
+    .section { margin-top: 20px; }
+    .radio-group label { display: block; margin: 5px 0; }
   </style>
 </head>
 <body>
   <div class="carrito">
-    <h2>Carrito de Compras FitZone</h2>
-    <div id="mensaje" class="mensaje">Producto añadido al carrito.</div>
+    <h2>Tu Carrito</h2>
+    <div id="mensaje" class="mensaje">Producto añadido al carrito</div>
     <table id="tabla-carrito">
       <thead>
         <tr>
-          <th>Producto</th>
-          <th>Precio</th>
-          <th>Cantidad</th>
-          <th>Subtotal</th>
-          <th>Acciones</th>
+          <th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th>Acciones</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-
     <div class="total">
       Subtotal: $<span id="subtotal">0.00</span><br>
       Descuento: -$<span id="descuento">0.00</span><br>
       Total a pagar: $<span id="total">0.00</span>
     </div>
-
-    <label for="codigo">Código promocional:</label>
-    <input type="text" id="codigo" placeholder="Ingresa tu código">
-    <button class="btn" onclick="aplicarCodigo()">Aplicar</button>
-
-    <h3>Datos del Cliente</h3>
-    <input type="text" id="cliente-nombre" placeholder="Nombre completo">
-    <input type="text" id="cliente-telefono" placeholder="Número de teléfono">
-    <input type="text" id="cliente-direccion" placeholder="Dirección o enlace de Google Maps">
-    <textarea id="cliente-nota" placeholder="Nota adicional (opcional)" rows="3" style="width:100%;"></textarea>
-
-    <label for="pago">Método de pago:</label>
-    <select id="pago">
-      <option>Efectivo (USD)</option>
-      <option>Efectivo (CUP)</option>
-      <option>Transferencia (CUP)</option>
-      <option>Transferencia (MLC)</option>
-      <option>Pago en el Exterior (Zelle)</option>
-    </select>
-
+    <div class="section">
+      <label for="codigo">Código promocional:</label>
+      <input type="text" id="codigo" placeholder="Ingresa tu código">
+      <button class="btn" onclick="aplicarCodigo()">Aplicar</button>
+    </div>
+    <div class="section">
+      <h3>Método de Pago</h3>
+      <div class="radio-group">
+        <label><input type="radio" name="pago" value="Efectivo (USD)" checked> Efectivo (USD)</label>
+        <label><input type="radio" name="pago" value="Efectivo (CUP)"> Efectivo (CUP)</label>
+        <label><input type="radio" name="pago" value="Transferencia (CUP)"> Transferencia (CUP)</label>
+        <label><input type="radio" name="pago" value="Transferencia (MLC)"> Transferencia (MLC)</label>
+        <label><input type="radio" name="pago" value="Pago en el Exterior"> Pago en el Exterior</label>
+      </div>
+    </div>
+    <div class="section">
+      <h3>Datos del Cliente</h3>
+      <input type="text" id="cliente-nombre" placeholder="Nombre completo">
+      <input type="text" id="cliente-telefono" placeholder="Número de teléfono">
+      <input type="text" id="cliente-direccion" placeholder="Dirección o enlace de Google Maps">
+      <textarea id="cliente-nota" placeholder="Nota adicional (opcional)" rows="3"></textarea>
+    </div>
     <button class="btn" onclick="enviarPedido()">Enviar pedido por WhatsApp</button>
   </div>
-
   <script>
-    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    let descuentos = {
-      'DESCUENTO10': 10,
-      'FITO5': 5
-    };
+    let carrito = JSON.parse(localStorage.getItem('fz-cart')) || [];
+    const descuentos = { 'FIT10':10, 'FITO5':5 };
     let descuentoAplicado = 0;
-
     function actualizarCarrito() {
       const tabla = document.querySelector("#tabla-carrito tbody");
-      tabla.innerHTML = "";
-      let subtotal = 0;
-
-      carrito.forEach((item, i) => {
-        const fila = document.createElement("tr");
-        const sub = item.precio * item.cantidad;
-        subtotal += sub;
-
-        fila.innerHTML = `
-          <td>${item.nombre}</td>
-          <td>$${item.precio.toFixed(2)}</td>
-          <td>
-            <input type="number" min="1" value="${item.cantidad}" onchange="cambiarCantidad(${i}, this.value)">
-          </td>
+      tabla.innerHTML="";
+      let subtotal=0;
+      carrito.forEach((item,i)=>{
+        const sub=item.price*item.qty; subtotal+=sub;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`
+          <td>${item.name}</td>
+          <td>$${item.price.toFixed(2)}</td>
+          <td><input type="number" min="1" value="${item.qty}" onchange="cambiarCantidad(${i},this.value)"></td>
           <td>$${sub.toFixed(2)}</td>
-          <td><button onclick="eliminar(${i})">Eliminar</button></td>
-        `;
-        tabla.appendChild(fila);
+          <td><button onclick="eliminar(${i})">Eliminar</button></td>`;
+        tabla.appendChild(tr);
       });
-
-      const total = subtotal - descuentoAplicado;
-      document.getElementById("subtotal").textContent = subtotal.toFixed(2);
-      document.getElementById("descuento").textContent = descuentoAplicado.toFixed(2);
-      document.getElementById("total").textContent = total.toFixed(2);
-
-      localStorage.setItem("carrito", JSON.stringify(carrito));
+      document.getElementById("subtotal").textContent=subtotal.toFixed(2);
+      document.getElementById("descuento").textContent=descuentoAplicado.toFixed(2);
+      document.getElementById("total").textContent=(subtotal-descuentoAplicado).toFixed(2);
+      localStorage.setItem('fz-cart', JSON.stringify(carrito));
     }
-
-    function cambiarCantidad(i, cantidad) {
-      carrito[i].cantidad = parseInt(cantidad);
+    function cambiarCantidad(i,val){ carrito[i].qty=parseInt(val)||1; actualizarCarrito(); }
+    function eliminar(i){ carrito.splice(i,1); actualizarCarrito(); }
+    function aplicarCodigo(){
+      const code=document.getElementById("codigo").value.trim().toUpperCase();
+      if(descuentos[code]){ descuentoAplicado=descuentos[code]; alert("Descuento: $"+descuentoAplicado); }
+      else { descuentoAplicado=0; alert("Código no válido"); }
       actualizarCarrito();
     }
-
-    function eliminar(i) {
-      carrito.splice(i, 1);
-      actualizarCarrito();
+    function enviarPedido(){
+      if(!carrito.length){ alert("Carrito vacío"); return; }
+      const nombre=document.getElementById("cliente-nombre").value;
+      const tel=document.getElementById("cliente-telefono").value;
+      const dir=document.getElementById("cliente-direccion").value;
+      const nota=document.getElementById("cliente-nota").value;
+      const metodo=document.querySelector('input[name="pago"]:checked').value;
+      let msg="*Pedido FitZone*%0A";
+      carrito.forEach(i=>msg+=`- ${i.name} x${i.qty} = $${(i.price*i.qty).toFixed(2)}%0A`);
+      msg+=`%0ASubtotal: $${document.getElementById("subtotal").textContent}%0A`;
+      msg+=`Descuento: $${document.getElementById("descuento").textContent}%0A`;
+      msg+=`Total: $${document.getElementById("total").textContent}%0A`;
+      msg+=`%0AMétodo de pago: ${metodo}%0A`;
+      msg+=`Nombre: ${nombre}%0ATel: ${tel}%0ADirección: ${dir}%0ANota: ${nota}`;
+      window.open("https://wa.me/5353264753?text="+msg,"_blank");
     }
-
-    function aplicarCodigo() {
-      const codigo = document.getElementById("codigo").value.toUpperCase();
-      if (descuentos[codigo]) {
-        descuentoAplicado = descuentos[codigo];
-        alert("Código aplicado: $" + descuentoAplicado);
-      } else {
-        descuentoAplicado = 0;
-        alert("Código no válido.");
+    function mostrarMensaje(){
+      const m=document.getElementById("mensaje");
+      m.style.display="block"; setTimeout(()=>m.style.display="none",3000);
+    }
+    (function(){
+      const p=new URLSearchParams(window.location.search);
+      if(p.has("producto")){
+        carrito.push({ name:p.get("producto"), price:parseFloat(p.get("precio"))||0, qty:1 });
+        localStorage.setItem('fz-cart', JSON.stringify(carrito));
+        mostrarMensaje();
       }
       actualizarCarrito();
-    }
-
-    function enviarPedido() {
-      const nombre = document.getElementById("cliente-nombre").value;
-      const tel = document.getElementById("cliente-telefono").value;
-      const dir = document.getElementById("cliente-direccion").value;
-      const nota = document.getElementById("cliente-nota").value;
-      const pago = document.getElementById("pago").value;
-
-      let mensaje = `*Pedido FitZone*%0A`;
-      carrito.forEach(p => {
-        mensaje += `- ${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toFixed(2)}%0A`;
-      });
-      mensaje += `%0ASubtotal: $${document.getElementById("subtotal").textContent}`;
-      mensaje += `%0ADescuento: $${document.getElementById("descuento").textContent}`;
-      mensaje += `%0ATotal: $${document.getElementById("total").textContent}`;
-      mensaje += `%0A%0A*Datos del cliente:*%0ANombre: ${nombre}%0ATeléfono: ${tel}%0ADirección: ${dir}%0ANota: ${nota}`;
-      mensaje += `%0AForma de pago: ${pago}`;
-
-      window.open(`https://wa.me/5353264753?text=${mensaje}`, '_blank');
-    }
-
-    function mostrarMensaje() {
-      const mensaje = document.getElementById("mensaje");
-      mensaje.style.display = "block";
-      setTimeout(() => mensaje.style.display = "none", 3000);
-    }
-
-    function agregarProducto(nombre, precio) {
-      const existente = carrito.find(p => p.nombre === nombre);
-      if (existente) {
-        existente.cantidad += 1;
-      } else {
-        carrito.push({ nombre, precio, cantidad: 1 });
-      }
-      mostrarMensaje();
-      actualizarCarrito();
-    }
-
-    window.onload = actualizarCarrito;
+    })();
   </script>
 </body>
 </html>
