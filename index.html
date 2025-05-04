@@ -289,6 +289,13 @@
     };
     document.getElementById('checkout').onclick = () => {
       if(!cart.length) return showToast('Carrito vacío');
+      const method = document.getElementById('payment').value;
+      const name = document.getElementById('cliente-nombre').value;
+      const phone = document.getElementById('cliente-telefono').value;
+      const addr = document.getElementById('cliente-direccion').value;
+      const note = encodeURIComponent(document.getElementById('note').value);
+      const items = cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
+      const total= document.getElementById('total').textContent;
       const msg = `¡Hola!%0A%0A` +
     `Número de pedido: ${numPedido}%0A%0A` +
     `🗓️ Fecha: ${fecha}%0A` +
@@ -303,10 +310,9 @@
     `Método de Pago: ${method}%0A%0ACosto total: ${total}%0A%0A` +
     (note ? `✏️ Nota del cliente: ${encodeURIComponent(note)}%0A%0A` : '') +
     `👆 Envía este mensaje para crear tu pedido.`;
-
-  window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
-  showToast('Abriendo WhatsApp...');
-};
+      window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
+      showToast('Abriendo WhatsApp...');
+    };
     // Add from URL
     (function(){
       const p = new URLSearchParams(window.location.search);
