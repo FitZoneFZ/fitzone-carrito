@@ -296,20 +296,7 @@
       const note = encodeURIComponent(document.getElementById('note').value);
       const items = cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
       const total= document.getElementById('total').textContent;
-      const msg = `¡Hola!%0A%0A` +
-    `Número de pedido: ${numPedido}%0A%0A` +
-    `🗓️ Fecha: ${fecha}%0A` +
-    `🕐 Hora: ${hora}%0A%0A` +
-    `👤 Información del cliente%0A` +
-    `Nombre: ${name}%0A` +
-    `Teléfono: ${phone}%0A%0A` +
-    `🏠 El pedido se llevará a domicilio:%0A` +
-    `📍 Dirección%0A${addr}%0A%0A` +
-    `📝 Pedido%0A%0A${items}%0A%0A` +
-    `💲 Costos%0A%0ASubtotal ${subtotal}%0ADescuento ${discount}%0A` +
-    `Método de Pago: ${method}%0A%0ACosto total: ${total}%0A%0A` +
-    (note ? `✏️ Nota del cliente: ${encodeURIComponent(note)}%0A%0A` : '') +
-    `👆 Envía este mensaje para crear tu pedido.`;
+      const msg = `*Pedido FitZone*%0A${items}%0A%0ASubtotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0A${note}`;
       window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
       showToast('Abriendo WhatsApp...');
     };
