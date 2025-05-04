@@ -288,15 +288,15 @@
       updateSummary();
     };
     document.getElementById('checkout').onclick = () => {
-      if(!cart.length) return showToast('Carrito vacío');
+      if (!cart.length) return showToast('Carrito vacío');
       const method = document.getElementById('payment').value;
       const name = document.getElementById('cliente-nombre').value;
       const phone = document.getElementById('cliente-telefono').value;
       const addr = document.getElementById('cliente-direccion').value;
       const note = encodeURIComponent(document.getElementById('note').value);
-      const items = cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
-      const total= document.getElementById('total').textContent;
-      const msg = `*Pedido FitZone*%0A${items}%0A%0ASubtotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0A${note}`;
+      const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
+      const total = document.getElementById('total').textContent;
+      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${total}%0A💳 *Pago:* ${method}%0A%0A👤 *Nombre:* ${name}%0A📞 *Teléfono:* ${phone}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
       window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
       showToast('Abriendo WhatsApp...');
     };
