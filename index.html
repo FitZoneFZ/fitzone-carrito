@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,7 +30,6 @@
       font-size: 1.5rem;
       font-weight: bold;
       color: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .container {
       display: flex;
@@ -45,7 +45,7 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
     .cart { flex: 2; }
-    .summary { flex: 1; max-width: 350px; height: fit-content; }
+    .summary { flex: 1; max-width: 350px; }
     .cart h2, .summary h2 { margin-top: 0; }
     .cart-item {
       display: flex;
@@ -69,15 +69,20 @@
     .cart-item-details small { color: #666; }
     .cart-item-controls {
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 0.5rem;
-      align-items: flex-end;
     }
-    .cart-item-controls input {
-      width: 60px;
-      padding: 0.25rem;
+    .qty-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
       border-radius: 4px;
-      border: 1px solid #ccc;
+      width: 24px; height: 24px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .qty-display {
+      width: 30px;
       text-align: center;
     }
     button, select, input, textarea { font: inherit; }
@@ -89,9 +94,14 @@
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.3s;
+      width: 100%;
+      margin-top: 0.5rem;
     }
     .btn:hover { background: #a00000; }
-    .btn-danger { background: #f44336; }
+    .btn-danger {
+      background: var(--accent);
+      color: #fff;
+    }
     .modal {
       display: none;
       position: fixed;
@@ -105,13 +115,11 @@
       max-width: 90%;
       max-height: 90%;
       border-radius: 6px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.7);
     }
     .toast-container {
       position: fixed;
       bottom: 1rem; right: 1rem;
       display: flex; flex-direction: column; gap: 0.5rem;
-      z-index: 1001;
     }
     .toast {
       background: var(--toast-bg);
@@ -120,7 +128,7 @@
       color: #fff;
       animation: fadein 0.3s, fadeout 0.3s 2.7s;
     }
-    @keyframes fadein { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+    @keyframes fadein { from {opacity:0;} to {opacity:1;} }
     @keyframes fadeout { from {opacity:1;} to {opacity:0;} }
     .summary label { display: block; margin-top: 0.75rem; font-weight: bold; }
     .summary input, .summary select, .summary textarea {
@@ -145,18 +153,10 @@
       <input id="coupon" placeholder="Ej: FIT10">
       <button class="btn" id="apply-coupon">Aplicar</button>
 
-      <label for="payment">Método de Pago</label>
+      <label for="payment">Pago en el Exterior</label>
       <select id="payment">
-        <optgroup label="Efectivo">
-          <option value="Efectivo USD">Efectivo USD</option>
-          <option value="Efectivo CUP">Efectivo CUP</option>
-        </optgroup>
-        <optgroup label="Transferencia">
-          <option value="Transferencia MLC">Transferencia MLC</option>
-          <option value="Transferencia CUP">Transferencia CUP</option>
-        </optgroup>
         <optgroup label="Pago en el Exterior">
-          <option value="Pago en el Exterior">Pago en el Exterior</option>
+          <option value="Zelle">Zelle</option>
         </optgroup>
       </select>
 
@@ -166,7 +166,7 @@
       <input id="cliente-telefono" placeholder="Número de teléfono">
       <label for="cliente-direccion">Dirección / Link Google Maps</label>
       <input id="cliente-direccion" placeholder="Dirección o link">
-      <label for="note">Nota al vendedor</label>
+      <label for="note">Notas adicionales</label>
       <textarea id="note" rows="3" placeholder="Instrucciones adicionales"></textarea>
 
       <button class="btn" id="checkout">Enviar por WhatsApp</button>
@@ -187,20 +187,24 @@
           <img src="${i.image}" data-idx="${idx}">
           <div class="cart-item-details"><strong>${i.name}</strong><br><small>${i.description}</small><br>$${i.price.toFixed(2)}</div>
           <div class="cart-item-controls">
-            <input type="number" min="1" value="${i.qty}" data-idx="${idx}">
-            <button class="btn btn-danger" data-rem="${idx}">Eliminar</button>
+            <button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button>
+            <span class="qty-display" id="qty-${idx}">${i.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
+            <button class="btn-danger btn" onclick="removeItem(${idx})">Eliminar</button>
           </div>`;
         c.append(item);
       });
       bindEvents(); updateSummary();
     }
+    function changeQty(idx, delta){
+      cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+      save(); render();
+    }
+    function removeItem(idx){ cart.splice(idx,1); save(); render(); showToast('Producto eliminado'); }
     function bindEvents(){
-      document.querySelectorAll('[data-rem]').forEach(b=>b.onclick=()=>{
-        cart.splice(b.dataset.rem,1);save();render();showToast('Producto eliminado');});
-      document.querySelectorAll('.cart-item-controls input').forEach(inp=>inp.onchange=()=>{
-        cart[parseInt(inp.dataset.idx)].qty=parseInt(inp.value)||1;save();render();});
       document.querySelectorAll('.cart-item img').forEach(img=>img.onclick=()=>{
-        const m=document.getElementById('modal');m.querySelector('img').src=img.src;m.style.display='flex';});
+        const m=document.getElementById('modal');m.querySelector('img').src=img.src;m.style.display='flex';
+      });
       document.getElementById('modal').onclick=()=>document.getElementById('modal').style.display='none';
     }
     function updateSummary(){
@@ -210,9 +214,11 @@
       document.getElementById('subtotal').textContent=`$${sub.toFixed(2)}`;
       document.getElementById('discount').textContent=`-$${disc.toFixed(2)}`;
       document.getElementById('total').textContent=`$${(sub-disc).toFixed(2)}`;
+      save();
     }
     document.getElementById('apply-coupon').onclick=()=>{
-      const code=document.getElementById('coupon').value.trim().toUpperCase();coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
+      const code=document.getElementById('coupon').value.trim().toUpperCase();
+      coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
     };
     document.getElementById('checkout').onclick=()=>{
       if(!cart.length)return showToast('Carrito vacío');
@@ -221,9 +227,9 @@
       const phone=document.getElementById('cliente-telefono').value;
       const addr=document.getElementById('cliente-direccion').value;
       const note=encodeURIComponent(document.getElementById('note').value);
-      const items=cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
+      const items=cart.map(i=>`\${i.name} x\${i.qty}`).join('%0A');
       const total=document.getElementById('total').textContent;
-      const msg=`*Pedido FitZone*%0A${items}%0A%0ATotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0ANota: ${note}`;
+      const msg=`*Pedido FitZone*%0A\${items}%0A%0ATotal: \${total}%0APago: \${method}%0ANombre: \${name}%0ATeléfono: \${phone}%0ADirección: \${addr}%0ANota: \${note}`;
       window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg),'_blank');showToast('Abriendo WhatsApp...');
     };
     (function(){
@@ -231,7 +237,8 @@
       if(p.has('producto')){
         cart.push({ name:p.get('producto'), price:parseFloat(p.get('precio'))||0, image:p.get('imagen')||'', description:p.get('descripcion')||'', qty:1 });
         save(); render(); showToast('Producto añadido');
-      }})();
+      }
+    })();
     render();
   </script>
 </body>
