@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,9 +12,8 @@
       --card-bg: #f9f9f9;
       --toast-bg: rgba(0,0,0,0.8);
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
       background: var(--bg);
       color: var(--fg);
@@ -25,11 +23,11 @@
     }
     header {
       background: var(--accent);
+      color: #fff;
       padding: 1rem;
       text-align: center;
       font-size: 1.5rem;
       font-weight: bold;
-      color: #fff;
     }
     .container {
       display: flex;
@@ -46,12 +44,12 @@
     }
     .cart { flex: 2; }
     .summary { flex: 1; max-width: 350px; }
-    .cart h2, .summary h2 { margin-top: 0; }
+    h2 { margin-bottom: 1rem; }
     .cart-item {
       display: flex;
       gap: 1rem;
-      margin-bottom: 1rem;
       align-items: center;
+      margin-bottom: 1rem;
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -59,14 +57,21 @@
     }
     .cart-item img {
       width: 80px; height: 80px;
-      cursor: pointer;
-      border-radius: 4px;
       object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
       border: 1px solid #ccc;
     }
-    .cart-item-details { flex: 1; }
-    .cart-item-details strong { display: block; font-size: 1.1rem; }
-    .cart-item-details small { color: #666; }
+    .cart-item-details {
+      flex: 1;
+    }
+    .cart-item-details strong {
+      display: block;
+      font-size: 1.1rem;
+    }
+    .cart-item-details small {
+      color: #666;
+    }
     .cart-item-controls {
       display: flex;
       align-items: center;
@@ -77,31 +82,38 @@
       color: #fff;
       border: none;
       border-radius: 4px;
-      width: 24px; height: 24px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
-      font-weight: bold;
+      font-size: 1rem;
+      line-height: 1;
     }
     .qty-display {
       width: 30px;
       text-align: center;
     }
-    button, select, input, textarea { font: inherit; }
-    .btn {
-      padding: 0.6rem 1rem;
+    .btn-danger {
       background: var(--accent);
       color: #fff;
       border: none;
       border-radius: 4px;
+      padding: 0.4rem 0.8rem;
       cursor: pointer;
-      transition: background 0.3s;
+    }
+    button, select, input, textarea {
+      font: inherit;
+    }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
       width: 100%;
       margin-top: 0.5rem;
     }
     .btn:hover { background: #a00000; }
-    .btn-danger {
-      background: var(--accent);
-      color: #fff;
-    }
     .modal {
       display: none;
       position: fixed;
@@ -120,20 +132,30 @@
       position: fixed;
       bottom: 1rem; right: 1rem;
       display: flex; flex-direction: column; gap: 0.5rem;
+      z-index: 1001;
     }
     .toast {
       background: var(--toast-bg);
+      color: #fff;
       padding: 0.75rem 1rem;
       border-radius: 4px;
-      color: #fff;
       animation: fadein 0.3s, fadeout 0.3s 2.7s;
     }
     @keyframes fadein { from {opacity:0;} to {opacity:1;} }
     @keyframes fadeout { from {opacity:1;} to {opacity:0;} }
-    .summary label { display: block; margin-top: 0.75rem; font-weight: bold; }
+    .summary label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
     .summary input, .summary select, .summary textarea {
-      width: 100%; margin-top: 0.25rem; padding: 0.5rem;
-      border-radius: 4px; border: 1px solid #ccc; background: #fff; color: #222;
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #222;
     }
   </style>
 </head>
@@ -152,14 +174,12 @@
       <label for="coupon">Código Promocional</label>
       <input id="coupon" placeholder="Ej: FIT10">
       <button class="btn" id="apply-coupon">Aplicar</button>
-
       <label for="payment">Pago en el Exterior</label>
       <select id="payment">
         <optgroup label="Pago en el Exterior">
           <option value="Zelle">Zelle</option>
         </optgroup>
       </select>
-
       <label for="cliente-nombre">Nombre del cliente</label>
       <input id="cliente-nombre" placeholder="Nombre completo">
       <label for="cliente-telefono">Teléfono</label>
@@ -168,7 +188,6 @@
       <input id="cliente-direccion" placeholder="Dirección o link">
       <label for="note">Notas adicionales</label>
       <textarea id="note" rows="3" placeholder="Instrucciones adicionales"></textarea>
-
       <button class="btn" id="checkout">Enviar por WhatsApp</button>
     </aside>
   </div>
@@ -176,64 +195,66 @@
   <div class="toast-container" id="toasts"></div>
   <script>
     let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon=null;
-    const coupons={ 'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5} };
-    function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toasts').append(t);setTimeout(()=>t.remove(),3000);}
-    function save(){localStorage.setItem('fz-cart',JSON.stringify(cart));}
+    const coupons = {'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5}};
+    function showToast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.getElementById('toasts').append(t); setTimeout(()=>t.remove(),3000); }
+    function save(){ localStorage.setItem('fz-cart', JSON.stringify(cart)); }
     function render(){
-      const c=document.getElementById('cart-items');c.innerHTML='';
-      cart.forEach((i,idx)=>{
-        const item=document.createElement('div');item.className='cart-item';
+      const c = document.getElementById('cart-items'); c.innerHTML='';
+      cart.forEach((i, idx)=>{
+        const item = document.createElement('div'); item.className='cart-item';
         item.innerHTML=`
           <img src="${i.image}" data-idx="${idx}">
-          <div class="cart-item-details"><strong>${i.name}</strong><br><small>${i.description}</small><br>$${i.price.toFixed(2)}</div>
+          <div class="cart-item-details">
+            <strong>${i.name}</strong><br><small>${i.description}</small><br>$${i.price.toFixed(2)}
+          </div>
           <div class="cart-item-controls">
             <button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button>
             <span class="qty-display" id="qty-${idx}">${i.qty}</span>
             <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
-            <button class="btn-danger btn" onclick="removeItem(${idx})">Eliminar</button>
+            <button class="btn-danger" onclick="removeItem(${idx})">Eliminar</button>
           </div>`;
         c.append(item);
       });
       bindEvents(); updateSummary();
     }
     function changeQty(idx, delta){
-      cart[idx].qty = Math.max(1, cart[idx].qty + delta);
-      save(); render();
+      cart[idx].qty = Math.max(1, cart[idx].qty + delta); save(); render();
     }
     function removeItem(idx){ cart.splice(idx,1); save(); render(); showToast('Producto eliminado'); }
     function bindEvents(){
       document.querySelectorAll('.cart-item img').forEach(img=>img.onclick=()=>{
-        const m=document.getElementById('modal');m.querySelector('img').src=img.src;m.style.display='flex';
+        const m = document.getElementById('modal'); m.querySelector('img').src = img.src; m.style.display='flex';
       });
       document.getElementById('modal').onclick=()=>document.getElementById('modal').style.display='none';
     }
     function updateSummary(){
-      const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
-      let disc=0;
-      if(coupon){disc=coupon.type=='fixed'?coupon.amount:sub*(coupon.amount/100);if(disc>sub)disc=sub;}
-      document.getElementById('subtotal').textContent=`$${sub.toFixed(2)}`;
-      document.getElementById('discount').textContent=`-$${disc.toFixed(2)}`;
-      document.getElementById('total').textContent=`$${(sub-disc).toFixed(2)}`;
+      const sub = cart.reduce((s,i)=>s+i.price*i.qty,0);
+      let disc = 0;
+      if(coupon){ disc = coupon.type=='fixed'?coupon.amount:(sub*(coupon.amount/100)); if(disc>sub)disc=sub; }
+      document.getElementById('subtotal').textContent = `$${sub.toFixed(2)}`;
+      document.getElementById('discount').textContent = `-$${disc.toFixed(2)}`;
+      document.getElementById('total').textContent = `$${(sub-disc).toFixed(2)}`;
       save();
     }
     document.getElementById('apply-coupon').onclick=()=>{
-      const code=document.getElementById('coupon').value.trim().toUpperCase();
-      coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
+      const code = document.getElementById('coupon').value.trim().toUpperCase();
+      coupon = coupons[code]||null; showToast(coupon?'Cupón aplicado':'Cupón inválido'); updateSummary();
     };
     document.getElementById('checkout').onclick=()=>{
-      if(!cart.length)return showToast('Carrito vacío');
-      const method=document.getElementById('payment').value;
-      const name=document.getElementById('cliente-nombre').value;
-      const phone=document.getElementById('cliente-telefono').value;
-      const addr=document.getElementById('cliente-direccion').value;
-      const note=encodeURIComponent(document.getElementById('note').value);
-      const items=cart.map(i=>`\${i.name} x\${i.qty}`).join('%0A');
-      const total=document.getElementById('total').textContent;
-      const msg=`*Pedido FitZone*%0A\${items}%0A%0ATotal: \${total}%0APago: \${method}%0ANombre: \${name}%0ATeléfono: \${phone}%0ADirección: \${addr}%0ANota: \${note}`;
-      window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg),'_blank');showToast('Abriendo WhatsApp...');
+      if(!cart.length) return showToast('Carrito vacío');
+      const method = document.getElementById('payment').value;
+      const name = document.getElementById('cliente-nombre').value;
+      const phone = document.getElementById('cliente-telefono').value;
+      const addr = document.getElementById('cliente-direccion').value;
+      const note = encodeURIComponent(document.getElementById('note').value);
+      const items = cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
+      const total = document.getElementById('total').textContent;
+      const msg = `*Pedido FitZone*%0A${items}%0A%0ATotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0ANotas: ${note}`;
+      window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg), '_blank');
+      showToast('Abriendo WhatsApp...');
     };
     (function(){
-      const p=new URLSearchParams(window.location.search);
+      const p = new URLSearchParams(window.location.search);
       if(p.has('producto')){
         cart.push({ name:p.get('producto'), price:parseFloat(p.get('precio'))||0, image:p.get('imagen')||'', description:p.get('descripcion')||'', qty:1 });
         save(); render(); showToast('Producto añadido');
