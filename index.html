@@ -38,22 +38,14 @@
       gap: 1rem;
       flex-wrap: wrap;
     }
-    .cart {
-      flex: 2;
+    .cart, .summary {
       background: var(--card-bg);
       border-radius: 8px;
       padding: 1rem;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
-    .summary {
-      flex: 1;
-      background: var(--card-bg);
-      border-radius: 8px;
-      padding: 1rem;
-      max-width: 350px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      height: fit-content;
-    }
+    .cart { flex: 2; }
+    .summary { flex: 1; max-width: 350px; height: fit-content; }
     .cart h2, .summary h2 { margin-top: 0; }
     .cart-item {
       display: flex;
@@ -78,8 +70,8 @@
     .cart-item-controls {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
       gap: 0.5rem;
+      align-items: flex-end;
     }
     .cart-item-controls input {
       width: 60px;
@@ -88,9 +80,7 @@
       border: 1px solid #ccc;
       text-align: center;
     }
-    button, select, input, textarea {
-      font: inherit;
-    }
+    button, select, input, textarea { font: inherit; }
     .btn {
       padding: 0.6rem 1rem;
       background: var(--accent);
@@ -170,7 +160,6 @@
         </optgroup>
       </select>
 
-      <!-- Campos de datos del cliente -->
       <label for="cliente-nombre">Nombre del cliente</label>
       <input id="cliente-nombre" placeholder="Nombre completo">
       <label for="cliente-telefono">Teléfono</label>
@@ -217,17 +206,13 @@
     function updateSummary(){
       const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
       let disc=0;
-      if(coupon){
-        disc=coupon.type=='fixed'?coupon.amount:sub*(coupon.amount/100);
-        if(disc>sub)disc=sub;
-      }
+      if(coupon){disc=coupon.type=='fixed'?coupon.amount:sub*(coupon.amount/100);if(disc>sub)disc=sub;}
       document.getElementById('subtotal').textContent=`$${sub.toFixed(2)}`;
       document.getElementById('discount').textContent=`-$${disc.toFixed(2)}`;
       document.getElementById('total').textContent=`$${(sub-disc).toFixed(2)}`;
     }
     document.getElementById('apply-coupon').onclick=()=>{
-      const code=document.getElementById('coupon').value.trim().toUpperCase();
-      coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
+      const code=document.getElementById('coupon').value.trim().toUpperCase();coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
     };
     document.getElementById('checkout').onclick=()=>{
       if(!cart.length)return showToast('Carrito vacío');
