@@ -244,58 +244,84 @@
             </div>
             <div><strong>$${item.price.toFixed(2)}</strong></div>
           </div>
-          <div class="cart-item-controls"> ...
-    // (rest of original script up to checkout)
-    // Updated checkout block only:
-  document.getElementById('checkout').onclick = () => {
-    if(!cart.length) return showToast('Carrito vacío');
-    
-    const method = document.getElementById('payment').value;
-    const name = document.getElementById('cliente-nombre').value.trim();
-    const phone = document.getElementById('cliente-telefono').value.trim();
-    const addr = document.getElementById('cliente-direccion').value.trim();
-    const note = document.getElementById('note').value.trim();
-    
-    if(!name || !phone || !addr) return showToast('Completa todos los datos del cliente');
-    
-    const now = new Date();
-    const fecha = now.toLocaleDateString('es-ES');
-    const hora = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-    const pedidoID = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
-    
-    const subtotal = document.getElementById('subtotal').textContent;
-    const total = document.getElementById('total').textContent;
-    const costoEnvio = "$0.00 USD";
-    
-    const items = cart.map(i => 
-      `x${i.qty} ${i.name}   $ ${(i.price * i.qty).toFixed(2)} USD`
-    ).join('%0A');
-    
-    let msg = `¡Hola!%0A%0A` +
-              `Número de pedido: ${pedidoID}%0A%0A` +
-              `🗓️ Fecha: ${fecha}%0A` +
-              `🕐 Hora: ${hora}%0A%0A` +
-              `👤 Información del cliente%0A` +
-              `Nombre: ${name}%0A` +
-              `Teléfono: ${phone}%0A%0A` +
-              `🏠 El pedido se llevará a domicilio:%0A%0A` +
-              `📍 Dirección%0A${addr}%0A%0A` +
-              `📝 Pedido%0A%0A${items}%0A%0A` +
-              `💲 Costos%0A%0A` +
-              `Total parcial: ${subtotal} USD%0A` +
-              `Costo de envío: ${costoEnvio}%0A` +
-              `Método de Pago: ${method}%0A%0A` +
-              `Costo total: ${total} USD%0A%0A`;
-    
-    if(note) msg += `✏️ Notas del cliente:%0A${encodeURIComponent(note)}%0A%0A`;
-    
-    msg += `👆 Envía este mensaje para crear tu pedido.`;
-    
-    window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
-    showToast('Abriendo WhatsApp...');
-  };
-  
-  // IIFE and rest of script remain unchanged
+          <div class="cart-item-controls">
+            <div class="qty-group">
+              <button class="qty-btn" onclick="changeQty(${i},-1)">-</button>
+              <input type="number" class="qty-display" id="qty-${i}" value="${item.qty}" onchange="setQty(${i}, this.value)">
+              <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
+            </div>
+            <button class="btn-danger" onclick="removeItem(${i})">Eliminar</button>
+          </div>`;
+        container.append(div);
+      });
+      bindEvents(); updateSummary();
+    }
+    function changeQty(i,delta){ cart[i].qty = Math.max(1, cart[i].qty+delta); save(); render(); }
+    function setQty(i,val){ cart[i].qty = Math.max(1, parseInt(val)||1); save(); render(); }
+    function removeItem(i){ cart.splice(i,1); save(); render(); showToast('Producto eliminado'); }
+    function bindEvents() {
+      document.querySelectorAll('.cart-item img').forEach(img => {
+        img.onclick = () => {
+          const modal = document.getElementById('modal');
+          modal.querySelector('img').src = img.src;
+          modal.style.display = 'flex';
+        };
+      });
+      document.getElementById('modal').onclick = () => document.getElementById('modal').style.display = 'none';
+    }
+    function updateSummary() {
+      const sub = cart.reduce((s,i)=>s + i.price*i.qty,0);
+      let disc = 0;
+      if(coupon){
+        disc = coupon.type==='fixed' ? coupon.amount : sub*(coupon.amount/100);
+        if(disc>sub) disc=sub;
+      }
+      document.getElementById('subtotal').textContent = `$${sub.toFixed(2)}`;
+      document.getElementById('discount').textContent = `-$${disc.toFixed(2)}`;
+      document.getElementById('total').textContent = `$${(sub-disc).toFixed(2)}`;
+      save();
+    }
+    document.getElementById('apply-coupon').onclick = () => {
+      const code = document.getElementById('coupon').value.trim().toUpperCase();
+      coupon = coupons[code]||null;
+      showToast(coupon ? 'Cupón aplicado' : 'Cupón inválido');
+      updateSummary();
+    };
+    document.getElementById('checkout').onclick = () => {
+      if(!cart.length) return showToast('Carrito vacío');
+      const msg = `¡Hola!%0A%0A` +
+    `Número de pedido: ${numPedido}%0A%0A` +
+    `🗓️ Fecha: ${fecha}%0A` +
+    `🕐 Hora: ${hora}%0A%0A` +
+    `👤 Información del cliente%0A` +
+    `Nombre: ${name}%0A` +
+    `Teléfono: ${phone}%0A%0A` +
+    `🏠 El pedido se llevará a domicilio:%0A` +
+    `📍 Dirección%0A${addr}%0A%0A` +
+    `📝 Pedido%0A%0A${items}%0A%0A` +
+    `💲 Costos%0A%0ASubtotal ${subtotal}%0ADescuento ${discount}%0A` +
+    `Método de Pago: ${method}%0A%0ACosto total: ${total}%0A%0A` +
+    (note ? `✏️ Nota del cliente: ${encodeURIComponent(note)}%0A%0A` : '') +
+    `👆 Envía este mensaje para crear tu pedido.`;
+
+  window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
+  showToast('Abriendo WhatsApp...');
+};
+    // Add from URL
+    (function(){
+      const p = new URLSearchParams(window.location.search);
+      if(p.has('producto')){
+        cart.push({
+          name: p.get('producto'),
+          price: parseFloat(p.get('precio'))||0,
+          image: p.get('imagen')||'',
+          description: p.get('descripcion')||'',
+          qty: 1
+        });
+        save(); render(); showToast('Producto añadido');
+      }
+    })();
+    render();
   </script>
 </body>
 </html>
