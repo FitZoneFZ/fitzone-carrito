@@ -1,126 +1,253 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carrito FitZone</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #fdfdfd; color: #222; padding: 20px; }
-    .carrito { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-    h2 { color: #800020; text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-bottom: 20px; }
-    input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px; margin: 8px 0; border-radius: 4px; border: 1px solid #ccc; }
-    .btn { background: #800020; color: white; border: none; padding: 10px 20px; margin-top: 10px; cursor: pointer; border-radius: 8px; display: block; width: 100%; font-size: 1em; }
-    .mensaje { color: #4caf50; margin: 10px 0; display: none; text-align: center; }
-    .section { margin-top: 20px; }
-    .radio-group label { display: block; margin: 5px 0; }
+    :root {
+      --bg: #fff;
+      --fg: #222;
+      --accent: #800000;
+      --card-bg: #f9f9f9;
+      --toast-bg: rgba(0,0,0,0.8);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: var(--accent);
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      padding: 1rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cart {
+      flex: 2;
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .summary {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 1rem;
+      max-width: 350px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      height: fit-content;
+    }
+    .cart h2, .summary h2 { margin-top: 0; }
+    .cart-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    .cart-item img {
+      width: 80px; height: 80px;
+      cursor: pointer;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .cart-item-details { flex: 1; }
+    .cart-item-details strong { display: block; font-size: 1.1rem; }
+    .cart-item-details small { color: #666; }
+    .cart-item-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    .cart-item-controls input {
+      width: 60px;
+      padding: 0.25rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    button, select, input, textarea {
+      font: inherit;
+    }
+    .btn {
+      padding: 0.6rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover { background: #a00000; }
+    .btn-danger { background: #f44336; }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+    .toast-container {
+      position: fixed;
+      bottom: 1rem; right: 1rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      z-index: 1001;
+    }
+    .toast {
+      background: var(--toast-bg);
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      color: #fff;
+      animation: fadein 0.3s, fadeout 0.3s 2.7s;
+    }
+    @keyframes fadein { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+    @keyframes fadeout { from {opacity:1;} to {opacity:0;} }
+    .summary label { display: block; margin-top: 0.75rem; font-weight: bold; }
+    .summary input, .summary select, .summary textarea {
+      width: 100%; margin-top: 0.25rem; padding: 0.5rem;
+      border-radius: 4px; border: 1px solid #ccc; background: #fff; color: #222;
+    }
   </style>
 </head>
 <body>
-  <div class="carrito">
-    <h2>Tu Carrito</h2>
-    <div id="mensaje" class="mensaje">Producto añadido al carrito</div>
-    <table id="tabla-carrito">
-      <thead>
-        <tr>
-          <th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div class="total">
-      Subtotal: $<span id="subtotal">0.00</span><br>
-      Descuento: -$<span id="descuento">0.00</span><br>
-      Total a pagar: $<span id="total">0.00</span>
-    </div>
-    <div class="section">
-      <label for="codigo">Código promocional:</label>
-      <input type="text" id="codigo" placeholder="Ingresa tu código">
-      <button class="btn" onclick="aplicarCodigo()">Aplicar</button>
-    </div>
-    <div class="section">
-      <h3>Método de Pago</h3>
-      <div class="radio-group">
-        <label><input type="radio" name="pago" value="Efectivo (USD)" checked> Efectivo (USD)</label>
-        <label><input type="radio" name="pago" value="Efectivo (CUP)"> Efectivo (CUP)</label>
-        <label><input type="radio" name="pago" value="Transferencia (CUP)"> Transferencia (CUP)</label>
-        <label><input type="radio" name="pago" value="Transferencia (MLC)"> Transferencia (MLC)</label>
-        <label><input type="radio" name="pago" value="Pago en el Exterior"> Pago en el Exterior</label>
-      </div>
-    </div>
-    <div class="section">
-      <h3>Datos del Cliente</h3>
-      <input type="text" id="cliente-nombre" placeholder="Nombre completo">
-      <input type="text" id="cliente-telefono" placeholder="Número de teléfono">
-      <input type="text" id="cliente-direccion" placeholder="Dirección o enlace de Google Maps">
-      <textarea id="cliente-nota" placeholder="Nota adicional (opcional)" rows="3"></textarea>
-    </div>
-    <button class="btn" onclick="enviarPedido()">Enviar pedido por WhatsApp</button>
+  <header>Carrito FitZone</header>
+  <div class="container">
+    <section class="cart">
+      <h2>Tu Carrito</h2>
+      <div id="cart-items"></div>
+    </section>
+    <aside class="summary">
+      <h2>Resumen</h2>
+      <p>Subtotal: <span id="subtotal">$0.00</span></p>
+      <p>Descuento: <span id="discount">$0.00</span></p>
+      <p><strong>Total: <span id="total">$0.00</span></strong></p>
+      <label for="coupon">Código Promocional</label>
+      <input id="coupon" placeholder="Ej: FIT10">
+      <button class="btn" id="apply-coupon">Aplicar</button>
+
+      <label for="payment">Método de Pago</label>
+      <select id="payment">
+        <optgroup label="Efectivo">
+          <option value="Efectivo USD">Efectivo USD</option>
+          <option value="Efectivo CUP">Efectivo CUP</option>
+        </optgroup>
+        <optgroup label="Transferencia">
+          <option value="Transferencia MLC">Transferencia MLC</option>
+          <option value="Transferencia CUP">Transferencia CUP</option>
+        </optgroup>
+        <optgroup label="Pago en el Exterior">
+          <option value="Pago en el Exterior">Pago en el Exterior</option>
+        </optgroup>
+      </select>
+
+      <!-- Campos de datos del cliente -->
+      <label for="cliente-nombre">Nombre del cliente</label>
+      <input id="cliente-nombre" placeholder="Nombre completo">
+      <label for="cliente-telefono">Teléfono</label>
+      <input id="cliente-telefono" placeholder="Número de teléfono">
+      <label for="cliente-direccion">Dirección / Link Google Maps</label>
+      <input id="cliente-direccion" placeholder="Dirección o link">
+      <label for="note">Nota al vendedor</label>
+      <textarea id="note" rows="3" placeholder="Instrucciones adicionales"></textarea>
+
+      <button class="btn" id="checkout">Enviar por WhatsApp</button>
+    </aside>
   </div>
+  <div class="modal" id="modal"><img src="" alt="Preview"></div>
+  <div class="toast-container" id="toasts"></div>
   <script>
-    let carrito = JSON.parse(localStorage.getItem('fz-cart')) || [];
-    const descuentos = { 'FIT10':10, 'FITO5':5 };
-    let descuentoAplicado = 0;
-    function actualizarCarrito() {
-      const tabla = document.querySelector("#tabla-carrito tbody");
-      tabla.innerHTML="";
-      let subtotal=0;
-      carrito.forEach((item,i)=>{
-        const sub=item.price*item.qty; subtotal+=sub;
-        const tr=document.createElement("tr");
-        tr.innerHTML=`
-          <td>${item.name}</td>
-          <td>$${item.price.toFixed(2)}</td>
-          <td><input type="number" min="1" value="${item.qty}" onchange="cambiarCantidad(${i},this.value)"></td>
-          <td>$${sub.toFixed(2)}</td>
-          <td><button onclick="eliminar(${i})">Eliminar</button></td>`;
-        tabla.appendChild(tr);
+    let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon=null;
+    const coupons={ 'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5} };
+    function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toasts').append(t);setTimeout(()=>t.remove(),3000);}
+    function save(){localStorage.setItem('fz-cart',JSON.stringify(cart));}
+    function render(){
+      const c=document.getElementById('cart-items');c.innerHTML='';
+      cart.forEach((i,idx)=>{
+        const item=document.createElement('div');item.className='cart-item';
+        item.innerHTML=`
+          <img src="${i.image}" data-idx="${idx}">
+          <div class="cart-item-details"><strong>${i.name}</strong><br><small>${i.description}</small><br>$${i.price.toFixed(2)}</div>
+          <div class="cart-item-controls">
+            <input type="number" min="1" value="${i.qty}" data-idx="${idx}">
+            <button class="btn btn-danger" data-rem="${idx}">Eliminar</button>
+          </div>`;
+        c.append(item);
       });
-      document.getElementById("subtotal").textContent=subtotal.toFixed(2);
-      document.getElementById("descuento").textContent=descuentoAplicado.toFixed(2);
-      document.getElementById("total").textContent=(subtotal-descuentoAplicado).toFixed(2);
-      localStorage.setItem('fz-cart', JSON.stringify(carrito));
+      bindEvents(); updateSummary();
     }
-    function cambiarCantidad(i,val){ carrito[i].qty=parseInt(val)||1; actualizarCarrito(); }
-    function eliminar(i){ carrito.splice(i,1); actualizarCarrito(); }
-    function aplicarCodigo(){
-      const code=document.getElementById("codigo").value.trim().toUpperCase();
-      if(descuentos[code]){ descuentoAplicado=descuentos[code]; alert("Descuento: $"+descuentoAplicado); }
-      else { descuentoAplicado=0; alert("Código no válido"); }
-      actualizarCarrito();
+    function bindEvents(){
+      document.querySelectorAll('[data-rem]').forEach(b=>b.onclick=()=>{
+        cart.splice(b.dataset.rem,1);save();render();showToast('Producto eliminado');});
+      document.querySelectorAll('.cart-item-controls input').forEach(inp=>inp.onchange=()=>{
+        cart[parseInt(inp.dataset.idx)].qty=parseInt(inp.value)||1;save();render();});
+      document.querySelectorAll('.cart-item img').forEach(img=>img.onclick=()=>{
+        const m=document.getElementById('modal');m.querySelector('img').src=img.src;m.style.display='flex';});
+      document.getElementById('modal').onclick=()=>document.getElementById('modal').style.display='none';
     }
-    function enviarPedido(){
-      if(!carrito.length){ alert("Carrito vacío"); return; }
-      const nombre=document.getElementById("cliente-nombre").value;
-      const tel=document.getElementById("cliente-telefono").value;
-      const dir=document.getElementById("cliente-direccion").value;
-      const nota=document.getElementById("cliente-nota").value;
-      const metodo=document.querySelector('input[name="pago"]:checked').value;
-      let msg="*Pedido FitZone*%0A";
-      carrito.forEach(i=>msg+=`- ${i.name} x${i.qty} = $${(i.price*i.qty).toFixed(2)}%0A`);
-      msg+=`%0ASubtotal: $${document.getElementById("subtotal").textContent}%0A`;
-      msg+=`Descuento: $${document.getElementById("descuento").textContent}%0A`;
-      msg+=`Total: $${document.getElementById("total").textContent}%0A`;
-      msg+=`%0AMétodo de pago: ${metodo}%0A`;
-      msg+=`Nombre: ${nombre}%0ATel: ${tel}%0ADirección: ${dir}%0ANota: ${nota}`;
-      window.open("https://wa.me/5353264753?text="+msg,"_blank");
+    function updateSummary(){
+      const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+      let disc=0;
+      if(coupon){
+        disc=coupon.type=='fixed'?coupon.amount:sub*(coupon.amount/100);
+        if(disc>sub)disc=sub;
+      }
+      document.getElementById('subtotal').textContent=`$${sub.toFixed(2)}`;
+      document.getElementById('discount').textContent=`-$${disc.toFixed(2)}`;
+      document.getElementById('total').textContent=`$${(sub-disc).toFixed(2)}`;
     }
-    function mostrarMensaje(){
-      const m=document.getElementById("mensaje");
-      m.style.display="block"; setTimeout(()=>m.style.display="none",3000);
-    }
+    document.getElementById('apply-coupon').onclick=()=>{
+      const code=document.getElementById('coupon').value.trim().toUpperCase();
+      coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
+    };
+    document.getElementById('checkout').onclick=()=>{
+      if(!cart.length)return showToast('Carrito vacío');
+      const method=document.getElementById('payment').value;
+      const name=document.getElementById('cliente-nombre').value;
+      const phone=document.getElementById('cliente-telefono').value;
+      const addr=document.getElementById('cliente-direccion').value;
+      const note=encodeURIComponent(document.getElementById('note').value);
+      const items=cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
+      const total=document.getElementById('total').textContent;
+      const msg=`*Pedido FitZone*%0A${items}%0A%0ATotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0ANota: ${note}`;
+      window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg),'_blank');showToast('Abriendo WhatsApp...');
+    };
     (function(){
       const p=new URLSearchParams(window.location.search);
-      if(p.has("producto")){
-        carrito.push({ name:p.get("producto"), price:parseFloat(p.get("precio"))||0, qty:1 });
-        localStorage.setItem('fz-cart', JSON.stringify(carrito));
-        mostrarMensaje();
-      }
-      actualizarCarrito();
-    })();
+      if(p.has('producto')){
+        cart.push({ name:p.get('producto'), price:parseFloat(p.get('precio'))||0, image:p.get('imagen')||'', description:p.get('descripcion')||'', qty:1 });
+        save(); render(); showToast('Producto añadido');
+      }})();
+    render();
   </script>
 </body>
 </html>
