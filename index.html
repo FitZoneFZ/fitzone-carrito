@@ -292,11 +292,13 @@
       const method = document.getElementById('payment').value;
       const name = document.getElementById('cliente-nombre').value;
       const phone = document.getElementById('cliente-telefono').value;
-      const addr = document.getElementById('cliente-direccion').value;
+      const addr = encodeURIComponent(document.getElementById('cliente-direccion').value);
       const note = encodeURIComponent(document.getElementById('note').value);
+      const promoCode = document.getElementById('promo-code')?.value || 'Ninguno';
+      const discount = document.getElementById('discount')?.textContent || '0';
       const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
       const total = document.getElementById('total').textContent;
-      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${total}%0A💳 *Pago:* ${method}%0A%0A👤 *Nombre:* ${name}%0A📞 *Teléfono:* ${phone}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
+      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${total}%0A🏷️ *Descuento:* ${discount}%0A🎟️ *Código:* ${promoCode}%0A💳 *Pago:* ${method}%0A%0A👤 *Nombre:* ${name}%0A📞 *Teléfono:* ${phone}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
       window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
       showToast('Abriendo WhatsApp...');
     };
