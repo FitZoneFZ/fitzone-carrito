@@ -186,8 +186,8 @@
       <input id="cliente-telefono" placeholder="Número de teléfono">
       <label for="cliente-direccion">Dirección / Link Google Maps</label>
       <input id="cliente-direccion" placeholder="Dirección o link">
-      <label for="note">Notas adicionales</label>
-      <textarea id="note" rows="3" placeholder="Instrucciones adicionales"></textarea>
+      <label for="note">¿Quieres aclararnos algo?</label>
+      <textarea id="note" rows="3" placeholder="Escribe tu comentario"></textarea>
       <button class="btn" id="checkout">Enviar por WhatsApp</button>
     </aside>
   </div>
@@ -196,13 +196,13 @@
   <script>
     let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon=null;
     const coupons = {'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5}};
-    function showToast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.getElementById('toasts').append(t); setTimeout(()=>t.remove(),3000); }
-    function save(){ localStorage.setItem('fz-cart', JSON.stringify(cart)); }
+    function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toasts').append(t);setTimeout(()=>t.remove(),3000);}
+    function save(){localStorage.setItem('fz-cart',JSON.stringify(cart));}
     function render(){
       const c = document.getElementById('cart-items'); c.innerHTML='';
       cart.forEach((i, idx)=>{
         const item = document.createElement('div'); item.className='cart-item';
-        item.innerHTML=`
+        item.innerHTML = `
           <img src="${i.image}" data-idx="${idx}">
           <div class="cart-item-details">
             <strong>${i.name}</strong><br><small>${i.description}</small><br>$${i.price.toFixed(2)}
@@ -249,7 +249,7 @@
       const note = encodeURIComponent(document.getElementById('note').value);
       const items = cart.map(i=>`${i.name} x${i.qty}`).join('%0A');
       const total = document.getElementById('total').textContent;
-      const msg = `*Pedido FitZone*%0A${items}%0A%0ATotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0ANotas: ${note}`;
+      const msg = `*Pedido FitZone*%0A${items}%0A%0ATotal: ${total}%0APago: ${method}%0ANombre: ${name}%0ATeléfono: ${phone}%0ADirección: ${addr}%0A${note}`;
       window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg), '_blank');
       showToast('Abriendo WhatsApp...');
     };
