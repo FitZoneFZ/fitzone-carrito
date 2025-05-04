@@ -304,16 +304,38 @@
 
     document.getElementById('checkout').onclick = () => {
       if (!cart.length) return showToast('Carrito vacío');
-      const method = document.getElementById('payment').value;
+      // Cálculo de montos
+      const subValue = cart.reduce((s,i)=>s + i.price*i.qty,0);
+      const discValue = coupon
+        ? (coupon.type==='fixed' ? coupon.amount : subValue*(coupon.amount/100))
+        : 0;
+      const totalValue = subValue - discValue;
+      // Datos cliente
+      const paymentValue = document.getElementById('payment').value;
+      // Categorizar método de pago
+      let paymentCategory = '';
+      if (['USD','CUP'].includes(paymentValue)) {
+        paymentCategory = 'Efectivo';
+      } else if (['Transferencia CUP','Transferencia MLC'].includes(paymentValue)) {
+        paymentCategory = 'Transferencia';
+      } else {
+        paymentCategory = 'Pago en el Exterior';
+      }
+      const methodText = `${paymentCategory} - ${paymentValue}`;
       const name = document.getElementById('cliente-nombre').value;
       const phone = document.getElementById('cliente-telefono').value;
       const addr = encodeURIComponent(document.getElementById('cliente-direccion').value);
       const note = encodeURIComponent(document.getElementById('note').value);
+      // Cupón
       const codeUsed = appliedCode || 'Ninguno';
-      const discountText = document.getElementById('discount').textContent || '$0.00';
+      // Montos formateados
+      const subText = `$${subValue.toFixed(2)}`;
+      const discText = `-$${discValue.toFixed(2)}`;
+      const totalText = `$${totalValue.toFixed(2)}`;
+      // Items
       const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
-      const total = document.getElementById('total').textContent;
-      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${total}%0A🏷️ *Descuento:* ${discountText}%0A🎟️ *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${method}%0A%0A👤 *Nombre:* ${encodeURIComponent(name)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
+      // Mensaje
+      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${subText}%0A🏷️ *Descuento:* ${discText}%0A💰 *Total:* ${totalText}%0A🎟️ *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${methodText}%0A%0A👤 *Nombre:* ${encodeURIComponent(name)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
       window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
       showToast('Abriendo WhatsApp...');
     };
