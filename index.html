@@ -40,28 +40,37 @@
     .summary { flex:1; max-width: 350px; }
     h2 { margin-bottom: 1rem; }
     .cart-item {
-      display: flex; gap:1rem; align-items: center; margin-bottom:1rem;
-      background:#fff; border:1px solid #ddd; border-radius:6px; padding:0.75rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
     }
+    .cart-item-header { display: flex; gap: 1rem; align-items: center; }
     .cart-item img {
-      width:80px; height:80px; object-fit:cover; border-radius:4px; border:1px solid #ccc;
-      cursor:pointer;
+      width:80px; height:80px; object-fit:cover; border-radius:4px; border:1px solid #ccc; cursor:pointer;
     }
     .cart-item-details { flex:1; }
     .cart-item-details strong { display:block; font-size:1.1rem; }
     .cart-item-details small { color:#666; }
     .cart-item-controls {
-      display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
     .qty-group { display:flex; align-items:center; gap:0.25rem; }
     .qty-btn {
       background: var(--accent); color:#fff; border:none; border-radius:4px;
       width:24px; height:24px; cursor:pointer; font-size:1rem; line-height:1;
     }
-    .qty-display { width:30px; text-align:center; }
+    .qty-display {
+      width:40px; text-align:center; padding:4px; border:1px solid #ccc; border-radius:4px;
+    }
     .btn-danger {
       background: var(--accent); color:#fff; border:none; border-radius:4px;
-      padding:0.4rem 0.8rem; cursor:pointer; width:100%;
+      padding:0.4rem 0.8rem; cursor:pointer; width:auto;
     }
     button, select, input, textarea { font:inherit; }
     .btn {
@@ -82,8 +91,8 @@
       background: var(--toast-bg); color:#fff; padding:0.75rem 1rem; border-radius:4px;
       animation:fadein 0.3s, fadeout 0.3s 2.7s;
     }
-    @keyframes fadein { from {opacity:0;} to {opacity:1;} }
-    @keyframes fadeout { from {opacity:1;} to {opacity:0;} }
+    @keyframes fadein { from{opacity:0;}to{opacity:1;} }
+    @keyframes fadeout { from{opacity:1;}to{opacity:0;} }
     .summary label { display:block; margin-top:1rem; font-weight:bold; }
     .summary input, .summary select, .summary textarea {
       width:100%; margin-top:0.25rem; padding:0.5rem; border-radius:4px;
@@ -109,12 +118,12 @@
       <label for="payment">Método de Pago</label>
       <select id="payment">
         <optgroup label="Efectivo">
-          <option value="Efectivo USD">Efectivo USD</option>
-          <option value="Efectivo CUP">Efectivo CUP</option>
+          <option value="Efectivo USD">USD</option>
+          <option value="Efectivo CUP">CUP</option>
         </optgroup>
         <optgroup label="Transferencia">
-          <option value="Transferencia CUP">Transferencia CUP</option>
-          <option value="Transferencia MLC">Transferencia MLC</option>
+          <option value="Transferencia CUP">CUP</option>
+          <option value="Transferencia MLC">MLC</option>
         </optgroup>
         <optgroup label="Pago en el Exterior">
           <option value="Zelle">Zelle</option>
@@ -125,7 +134,7 @@
       <label for="cliente-telefono">Teléfono</label>
       <input id="cliente-telefono" placeholder="Número de teléfono">
       <label for="cliente-direccion">Dirección / Link Google Maps</label>
-      <input id="cliente-direccion" placeholder="Dirección o link">
+      <input id="cliente-direccion" placeholder="Dirección o enlace">
       <label for="note">¿Quieres aclararnos algo?</label>
       <textarea id="note" rows="3" placeholder="Escribe tu comentario"></textarea>
       <button class="btn" id="checkout">Enviar por WhatsApp</button>
@@ -134,73 +143,61 @@
   <div class="modal" id="modal"><img src="" alt="Preview"></div>
   <div class="toast-container" id="toasts"></div>
   <script>
-    let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon=null;
-    const coupons = {'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5}};
+    let cart=JSON.parse(localStorage.getItem('fz-cart')||'[]'),coupon=null;
+    const coupons={'FIT10':{type:'percent',amount:10},'FIT5':{type:'fixed',amount:5}};
     function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toasts').append(t);setTimeout(()=>t.remove(),3000);}
     function save(){localStorage.setItem('fz-cart',JSON.stringify(cart));}
     function render(){
-      const c = document.getElementById('cart-items'); c.innerHTML='';
-      cart.forEach((i, idx)=>{
-        const item = document.createElement('div'); item.className='cart-item';
-        item.innerHTML = \`
+      const c=document.getElementById('cart-items');c.innerHTML='';
+      cart.forEach((i,idx)=>{
+        const d=document.createElement('div');d.className='cart-item';
+        d.innerHTML=\`
+        <div class="cart-item-header">
           <img src="\${i.image}" data-idx="\${idx}">
-          <div class="cart-item-details">
-            <strong>\${i.name}</strong><br><small>\${i.description}</small><br>\$ \${i.price.toFixed(2)}
+          <div class="cart-item-details"><strong>\${i.name}</strong><small>\${i.description}</small></div>
+          <div><strong>$\${i.price.toFixed(2)}</strong></div>
+        </div>
+        <div class="cart-item-controls">
+          <div class="qty-group">
+            <button class="qty-btn" onclick="changeQty(\${idx},-1)">-</button>
+            <input type="number" class="qty-display" id="qty-\${idx}" value="\${i.qty}" onchange="setQty(\${idx},this.value)">
+            <button class="qty-btn" onclick="changeQty(\${idx},1)">+</button>
           </div>
-          <div class="cart-item-controls">
-            <div class="qty-group">
-              <button class="qty-btn" onclick="changeQty(\${idx}, -1)">-</button>
-              <span class="qty-display" id="qty-\${idx}">\${i.qty}</span>
-              <button class="qty-btn" onclick="changeQty(\${idx}, 1)">+</button>
-            </div>
-            <button class="btn-danger" onclick="removeItem(\${idx})">Eliminar</button>
-          </div>\`;
-        c.append(item);
+          <button class="btn-danger" onclick="removeItem(\${idx})">Eliminar</button>
+        </div>\`;
+        c.append(d);
       });
-      bindEvents(); updateSummary();
+      bindEvents();updateSummary();
     }
-    function changeQty(idx, delta){
-      cart[idx].qty = Math.max(1, cart[idx].qty + delta); save(); render();
-    }
-    function removeItem(idx){ cart.splice(idx,1); save(); render(); showToast('Producto eliminado'); }
+    function changeQty(idx,delta){cart[idx].qty=Math.max(1,cart[idx].qty+delta);save();render();}
+    function setQty(idx,val){cart[idx].qty=Math.max(1,parseInt(val)||1);save();render();}
+    function removeItem(idx){cart.splice(idx,1);save();render();showToast('Producto eliminado');}
     function bindEvents(){
       document.querySelectorAll('.cart-item img').forEach(img=>img.onclick=()=>{
-        const m=document.getElementById('modal'); m.querySelector('img').src=img.src; m.style.display='flex';
+        const m=document.getElementById('modal');m.querySelector('img').src=img.src;m.style.display='flex';
       });
       document.getElementById('modal').onclick=()=>document.getElementById('modal').style.display='none';
     }
     function updateSummary(){
-      const sub = cart.reduce((s,i)=>s+i.price*i.qty,0);
-      let disc = 0;
-      if(coupon){ disc = coupon.type=='fixed'?coupon.amount:(sub*(coupon.amount/100)); if(disc>sub)disc=sub; }
-      document.getElementById('subtotal').textContent = `\$${sub.toFixed(2)}`;
-      document.getElementById('discount').textContent = `-\$${disc.toFixed(2)}`;
-      document.getElementById('total').textContent = `\$${(sub-disc).toFixed(2)}`;
+      const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);let disc=0;
+      if(coupon){disc=coupon.type=='fixed'?coupon.amount:(sub*(coupon.amount/100));if(disc>sub)disc=sub;}
+      document.getElementById('subtotal').textContent=`$\${sub.toFixed(2)}`;
+      document.getElementById('discount').textContent=`-$\${disc.toFixed(2)}`;
+      document.getElementById('total').textContent=`$\${(sub-disc).toFixed(2)}`;
       save();
     }
     document.getElementById('apply-coupon').onclick=()=>{
       const code=document.getElementById('coupon').value.trim().toUpperCase();
-      coupon=coupons[code]||null; showToast(coupon?'Cupón aplicado':'Cupón inválido'); updateSummary();
+      coupon=coupons[code]||null;showToast(coupon?'Cupón aplicado':'Cupón inválido');updateSummary();
     };
     document.getElementById('checkout').onclick=()=>{
       if(!cart.length) return showToast('Carrito vacío');
-      const method=document.getElementById('payment').value;
-      const name=document.getElementById('cliente-nombre').value;
-      const phone=document.getElementById('cliente-telefono').value;
-      const addr=document.getElementById('cliente-direccion').value;
-      const note=encodeURIComponent(document.getElementById('note').value);
-      const items=cart.map(i=>\`\${i.name} x\${i.qty}\`).join('%0A');
-      const total=document.getElementById('total').textContent;
-      const msg=\`*Pedido FitZone*%0A\${items}%0A%0ATotal: \${total}%0APago: \${method}%0ANombre: \${name}%0ATeléfono: \${phone}%0ADirección: \${addr}%0A\${note}\`;
-      window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg), '_blank'); showToast('Abriendo WhatsApp...');
+      const method=document.getElementById('payment').value,name=document.getElementById('cliente-nombre').value,phone=document.getElementById('cliente-telefono').value,addr=document.getElementById('cliente-direccion').value,note=encodeURIComponent(document.getElementById('note').value);
+      const items=cart.map(i=>\`\${i.name} x\${i.qty}\`).join('%0A'),total=document.getElementById('total').textContent;
+      const msg=\`*Pedido FitZone*%0A\${items}%0A%0ASubtotal: \$\${total}%0APago: \${method}%0ANombre: \${name}%0ATeléfono: \${phone}%0ADirección: \${addr}%0A\${note}\`;
+      window.open('https://wa.me/5353264753?text='+encodeURIComponent(msg),'_blank');showToast('Abriendo WhatsApp...');
     };
-    (function(){
-      const p=new URLSearchParams(window.location.search);
-      if(p.has('producto')){
-        cart.push({ name:p.get('producto'), price:parseFloat(p.get('precio'))||0, image:p.get('imagen')||'', description:p.get('descripcion')||'', qty:1 });
-        save(); render(); showToast('Producto añadido');
-      }
-    })();
+    (function(){const p=new URLSearchParams(window.location.search);if(p.has('producto')){cart.push({name:p.get('producto'),price:parseFloat(p.get('precio'))||0,image:p.get('imagen')||'',description:p.get('descripcion')||'',qty:1});save();render();showToast('Producto añadido');}})();
     render();
   </script>
 </body>
