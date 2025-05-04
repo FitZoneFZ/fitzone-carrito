@@ -173,6 +173,11 @@
       background: #fff;
       color: #222;
     }
+    #coupon-info {
+      margin-top: 0.5rem;
+      color: var(--accent);
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -187,6 +192,7 @@
       <p>Subtotal: <span id="subtotal">$0.00</span></p>
       <p>Descuento: <span id="discount">$0.00</span></p>
       <p><strong>Total: <span id="total">$0.00</span></strong></p>
+      <p id="coupon-info"></p>
       <label for="coupon">Código Promocional</label>
       <input id="coupon" placeholder="Ej: FIT10">
       <button class="btn" id="apply-coupon">Aplicar</button>
@@ -220,8 +226,9 @@
   <div class="toast-container" id="toasts"></div>
 
   <script>
-    let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon = null;
-    const coupons = { 'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5}};
+    let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon = null, appliedCode = null;
+    const coupons = { 'FIT10':{type:'percent',amount:10}, 'FIT5':{type:'fixed',amount:5} };
+
     function showToast(msg) {
       const t = document.createElement('div');
       t.className = 'toast'; t.textContent = msg;
@@ -229,6 +236,7 @@
       setTimeout(() => t.remove(), 3000);
     }
     function save() { localStorage.setItem('fz-cart', JSON.stringify(cart)); }
+
     function render() {
       const container = document.getElementById('cart-items');
       container.innerHTML = '';
@@ -259,6 +267,7 @@
     function changeQty(i,delta){ cart[i].qty = Math.max(1, cart[i].qty+delta); save(); render(); }
     function setQty(i,val){ cart[i].qty = Math.max(1, parseInt(val)||1); save(); render(); }
     function removeItem(i){ cart.splice(i,1); save(); render(); showToast('Producto eliminado'); }
+
     function bindEvents() {
       document.querySelectorAll('.cart-item img').forEach(img => {
         img.onclick = () => {
@@ -269,6 +278,7 @@
       });
       document.getElementById('modal').onclick = () => document.getElementById('modal').style.display = 'none';
     }
+
     function updateSummary() {
       const sub = cart.reduce((s,i)=>s + i.price*i.qty,0);
       let disc = 0;
@@ -279,14 +289,19 @@
       document.getElementById('subtotal').textContent = `$${sub.toFixed(2)}`;
       document.getElementById('discount').textContent = `-$${disc.toFixed(2)}`;
       document.getElementById('total').textContent = `$${(sub-disc).toFixed(2)}`;
+      const info = document.getElementById('coupon-info');
+      info.textContent = appliedCode ? `Código aplicado: ${appliedCode}` : '';
       save();
     }
+
     document.getElementById('apply-coupon').onclick = () => {
       const code = document.getElementById('coupon').value.trim().toUpperCase();
       coupon = coupons[code]||null;
+      appliedCode = coupon ? code : null;
       showToast(coupon ? 'Cupón aplicado' : 'Cupón inválido');
       updateSummary();
     };
+
     document.getElementById('checkout').onclick = () => {
       if (!cart.length) return showToast('Carrito vacío');
       const method = document.getElementById('payment').value;
@@ -294,28 +309,38 @@
       const phone = document.getElementById('cliente-telefono').value;
       const addr = encodeURIComponent(document.getElementById('cliente-direccion').value);
       const note = encodeURIComponent(document.getElementById('note').value);
-      const promoCode = document.getElementById('promo-code')?.value || 'Ninguno';
-      const discount = document.getElementById('discount')?.textContent || '0';
+      const codeUsed = appliedCode || 'Ninguno';
+      const discountText = document.getElementById('discount').textContent || '$0.00';
       const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
       const total = document.getElementById('total').textContent;
-      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${total}%0A🏷️ *Descuento:* ${discount}%0A🎟️ *Código:* ${promoCode}%0A💳 *Pago:* ${method}%0A%0A👤 *Nombre:* ${name}%0A📞 *Teléfono:* ${phone}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
+      const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${total}%0A🏷️ *Descuento:* ${discountText}%0A🎟️ *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${method}%0A%0A👤 *Nombre:* ${encodeURIComponent(name)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
       window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
       showToast('Abriendo WhatsApp...');
     };
+
     // Add from URL
     (function(){
       const p = new URLSearchParams(window.location.search);
       if(p.has('producto')){
-        cart.push({
-          name: p.get('producto'),
-          price: parseFloat(p.get('precio'))||0,
-          image: p.get('imagen')||'',
-          description: p.get('descripcion')||'',
-          qty: 1
-        });
+        const name = p.get('producto');
+        const image = p.get('imagen') || '';
+        const description = p.get('descripcion') || '';
+        const price = parseFloat(p.get('precio')) || 0;
+        const existing = cart.find(i => 
+          i.name === name &&
+          i.image === image &&
+          i.description === description
+        );
+        if (existing) {
+          existing.qty += 1;
+          existing.price = price;
+        } else {
+          cart.push({ name, price, image, description, qty: 1 });
+        }
         save(); render(); showToast('Producto añadido');
       }
     })();
+
     render();
   </script>
 </body>
