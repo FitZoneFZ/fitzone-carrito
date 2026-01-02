@@ -1,7 +1,0 @@
-{
-  "FIT10": {"type": "percent", "amount": 10},
-  "FIT5": {"type": "fixed", "amount": 5},
-  "FIT20": {"type": "percent", "amount": 20},
-  "WELCOME": {"type": "fixed", "amount": 8},
-  "HOLIDAY": {"type": "percent", "amount": 15}
-}
