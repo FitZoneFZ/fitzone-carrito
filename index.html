@@ -114,7 +114,7 @@ function save(){ localStorage.setItem('fz-cart', JSON.stringify(cart)); }
 
 async function loadCoupons(){
   try{
-    const res = await fetch('https://raw.githubusercontent.com/fitzonefz/fitzone-carrito/main/coupons.json');
+    const res = await fetch('https://raw.githubusercontent.com/tuusuario/fitzone-carrito/main/coupons.json');
     coupons = await res.json();
   }catch(e){ console.log('Error cargando cupones', e); }
 }
