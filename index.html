@@ -1,66 +1,65 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Carrito FitZone</title>
 <style>
-  :root {
-    --bg: #fff;
-    --fg: #222;
-    --accent: #800000;
-    --card-bg: #f9f9f9;
-    --toast-bg: rgba(0,0,0,0.8);
-  }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--fg); display:flex; flex-direction:column; min-height:100vh; }
-  header { background: var(--accent); color: #fff; padding:1rem; text-align:center; font-size:1.5rem; font-weight:bold; }
-  .container { display:flex; flex:1; padding:1rem; gap:1rem; flex-wrap:wrap; }
-  .cart, .summary { background: var(--card-bg); border-radius:8px; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
-  .cart { flex:2; }
-  .summary { flex:1; max-width:350px; }
-  h2 { margin-bottom:1rem; }
-  .cart-item { background:#fff; border:1px solid #ddd; border-radius:6px; padding:0.75rem; margin-bottom:1rem; }
-  .cart-item-header { display:flex; gap:1rem; align-items:center; }
-  .cart-item img { width:80px; height:80px; object-fit:cover; border-radius:4px; border:1px solid #ccc; cursor:pointer; }
-  .cart-item-details { flex:1; }
-  .cart-item-details strong { display:block; font-size:1.1rem; color:#222; } /* título negro */
-  .cart-item-details small { color:#666; }
-  .cart-item-controls { margin-top:0.5rem; display:flex; flex-direction:column; align-items:flex-start; gap:0.5rem; }
-  .qty-group { display:flex; align-items:center; gap:0.25rem; }
-  .qty-btn { background: var(--accent); color:#fff; border:none; border-radius:4px; width:24px; height:24px; cursor:pointer; font-size:1rem; line-height:1; }
-  .qty-display { width:50px; text-align:center; padding:4px; border:1px solid #ccc; border-radius:4px; }
-  .btn-danger { background: var(--accent); color:#fff; border:none; border-radius:4px; padding:0.4rem 0.8rem; cursor:pointer; align-self:stretch; text-align:center; }
-  button, select, input, textarea { font: inherit; }
-  .btn { background: var(--accent); color:#fff; border:none; border-radius:4px; padding:0.6rem 1rem; cursor:pointer; width:100%; margin-top:0.5rem; }
-  .btn:hover { background:#a00000; }
-  .modal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:1000; }
-  .modal img { max-width:90%; max-height:90%; border-radius:6px; }
-  .toast-container { position: fixed; bottom:1rem; right:1rem; display:flex; flex-direction:column; gap:0.5rem; z-index:1001; }
-  .toast { background: var(--toast-bg); color:#fff; padding:0.75rem 1rem; border-radius:4px; animation:fadein 0.3s, fadeout 0.3s 2.7s; }
-  @keyframes fadein { from {opacity:0;} to {opacity:1;} }
-  @keyframes fadeout { from {opacity:1;} to {opacity:0;} }
-  .summary label { display:block; margin-top:1rem; font-weight:bold; }
-  .summary input, .summary select, .summary textarea { width:100%; margin-top:0.25rem; padding:0.5rem; border-radius:4px; border:1px solid #ccc; background:#fff; color:#222; }
-  #coupon-info { margin-top:0.5rem; color:var(--accent); font-weight:bold; }
+:root{--bg:#fff;--fg:#222;--accent:#8B0000;--card-bg:#f9f9f9;--toast-bg:rgba(0,0,0,0.8)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial, sans-serif;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;min-height:100vh}
+header{background:var(--accent);color:#fff;padding:1rem;text-align:center;font-size:1.5rem;font-weight:700}
+.container{display:flex;flex-wrap:wrap;gap:1rem;padding:1rem}
+.cart,.summary{background:var(--card-bg);border-radius:8px;padding:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.cart{flex:2;min-width:280px}
+.summary{flex:1;max-width:380px;min-width:260px}
+h2{margin-bottom:1rem}
+.cart-item{background:#fff;border:1px solid #ddd;border-radius:6px;padding:0.75rem;margin-bottom:1rem}
+.cart-item-header{display:flex;gap:1rem;align-items:center}
+.cart-item img{width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid #ccc;cursor:pointer}
+.cart-item-details{flex:1}
+.cart-item-details a{display:block;font-size:1.05rem;color:#000;text-decoration:none}
+.cart-item-details a:hover{text-decoration:underline}
+.cart-item-details small{color:#666}
+.cart-item-controls{margin-top:0.5rem;display:flex;flex-direction:column;gap:0.5rem;align-items:flex-start}
+.qty-group{display:flex;align-items:center;gap:0.25rem}
+.qty-btn{background:var(--accent);color:#fff;border:none;border-radius:4px;width:24px;height:24px;cursor:pointer;font-size:1rem;line-height:1}
+.qty-display{width:56px;text-align:center;padding:4px;border:1px solid #ccc;border-radius:4px}
+.btn-danger{background:var(--accent);color:#fff;border:none;border-radius:4px;padding:0.4rem 0.8rem;cursor:pointer;align-self:stretch;text-align:center}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:4px;padding:0.6rem 1rem;cursor:pointer;width:100%;margin-top:0.5rem}
+.btn:hover{background:#a00000}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:1000}
+.modal img{max-width:90%;max-height:90%;border-radius:6px}
+.toast-container{position:fixed;bottom:1rem;right:1rem;display:flex;flex-direction:column;gap:0.5rem;z-index:1001}
+.toast{background:var(--toast-bg);color:#fff;padding:0.75rem 1rem;border-radius:4px;animation:fadein 0.3s,fadeout 0.3s 2.7s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}@keyframes fadeout{from{opacity:1}to{opacity:0}}
+.summary label{display:block;margin-top:1rem;font-weight:700}
+.summary input,.summary select,.summary textarea{width:100%;margin-top:0.25rem;padding:0.5rem;border-radius:4px;border:1px solid #ccc;background:#fff;color:#222}
+#coupon-info{margin-top:0.5rem;color:var(--accent);font-weight:700}
+.small-muted{font-size:0.9rem;color:#666}
 </style>
 </head>
 <body>
 <header>Carrito FitZone</header>
+
 <div class="container">
   <section class="cart">
     <h2>Tu Carrito</h2>
     <div id="cart-items"></div>
+    <p class="small-muted">Pulsa la imagen para ampliar. Pulsa el título para ir a la página del producto.</p>
   </section>
+
   <aside class="summary">
     <h2>Resumen</h2>
     <p>Subtotal: <span id="subtotal">$0.00</span></p>
     <p>Descuento: <span id="discount">$0.00</span></p>
     <p><strong>Total: <span id="total">$0.00</span></strong></p>
     <p id="coupon-info"></p>
+
     <label for="coupon">Código Promocional</label>
-    <input id="coupon" placeholder="Ej: FIT10">
+    <input id="coupon" placeholder="Ej: ZONE10">
     <button class="btn" id="apply-coupon">Aplicar</button>
+
     <label for="payment">Método de Pago</label>
     <select id="payment">
       <optgroup label="Efectivo">
@@ -74,6 +73,7 @@
         <option value="Zelle">Zelle</option>
       </optgroup>
     </select>
+
     <label for="cliente-nombre">Nombre del cliente</label>
     <input id="cliente-nombre" placeholder="Nombre completo">
     <label for="cliente-telefono">Teléfono</label>
@@ -90,128 +90,197 @@
 <div class="toast-container" id="toasts"></div>
 
 <script>
-  let cart = JSON.parse(localStorage.getItem('fz-cart')||'[]'), coupon = null, appliedCode = null;
+/* Carrito FitZone - corregido y funcional (método A: recibe productos por URL y guarda en localStorage) */
 
-  // Códigos de promoción internos
-  const coupons = {
-    'ZONE10': { type:'percent', amount:10 },
-    'ZONE5': { type:'fixed', amount:5 },
-    'SUPER15': { type:'percent', amount:15 } // ejemplo extra
-  };
+const STORAGE_KEY = 'fz-cart';
+let cart = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let coupon = null;
+let appliedCode = null;
 
-  function showToast(msg){
-    const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
-    document.getElementById('toasts').append(t);
-    setTimeout(()=>t.remove(),3000);
-  }
+/* EDITA aquí tus códigos de promoción si quieres */
+const coupons = {
+  'ZONE10': { type: 'percent', amount: 10 },
+  'ZONE5': { type: 'fixed', amount: 5 },
+  'SUPER15': { type: 'percent', amount: 15 }
+};
 
-  function save(){ localStorage.setItem('fz-cart',JSON.stringify(cart)); }
+function showToast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
 
-  function render(){
-    const container=document.getElementById('cart-items'); container.innerHTML='';
-    cart.forEach((item,i)=>{
-      const div=document.createElement('div'); div.className='cart-item';
-      div.innerHTML=`
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }
+
+function render(){
+  const container = document.getElementById('cart-items');
+  container.innerHTML = '';
+  cart.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    // item.link may be empty string
+    const titleHtml = item.link ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.name)}</a>` : `<span>${escapeHtml(item.name)}</span>`;
+    const optionsText = [
+      item.option1 ? `${escapeHtml(item.option1.label)}: ${escapeHtml(item.option1.value)}` : '',
+      item.option2 ? `${escapeHtml(item.option2.label)}: ${escapeHtml(item.option2.value)}` : ''
+    ].filter(Boolean).join(' • ');
+    div.innerHTML = `
       <div class="cart-item-header">
-        <img src="${item.image}" data-i="${i}">
+        <img src="${escapeAttr(item.image)}" data-i="${i}" alt="${escapeAttr(item.name)}">
         <div class="cart-item-details">
-          <strong>${item.name}</strong>
-          <small>${item.description}</small>
+          ${titleHtml}
+          <small>${escapeHtml(item.description || optionsText)}</small>
         </div>
-        <div><strong>$${item.price.toFixed(2)}</strong></div>
+        <div><strong>$${Number(item.price).toFixed(2)}</strong></div>
       </div>
       <div class="cart-item-controls">
         <div class="qty-group">
-          <button class="qty-btn" onclick="changeQty(${i},-1)">-</button>
-          <input type="number" class="qty-display" id="qty-${i}" value="${item.qty}" onchange="setQty(${i},this.value)">
-          <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
+          <button class="qty-btn" onclick="changeQty(${i}, -1)">-</button>
+          <input type="number" class="qty-display" id="qty-${i}" value="${item.qty}" onchange="setQty(${i}, this.value)">
+          <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
         </div>
         <button class="btn-danger" onclick="removeItem(${i})">Eliminar</button>
-      </div>`;
-      container.append(div);
-    });
-    bindEvents(); updateSummary();
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  bindEvents();
+  updateSummary();
+}
+
+/* helpers to escape */
+function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function escapeAttr(s){ if(!s && s!==0) return ''; return String(s).replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+
+function changeQty(i, delta){
+  cart[i].qty = Math.max(1, (parseInt(cart[i].qty) || 1) + delta);
+  save(); render();
+}
+function setQty(i, val){
+  cart[i].qty = Math.max(1, parseInt(val) || 1);
+  save(); render();
+}
+function removeItem(i){
+  cart.splice(i,1);
+  save(); render();
+  showToast('Producto eliminado');
+}
+
+function bindEvents(){
+  document.querySelectorAll('.cart-item img').forEach(img=>{
+    img.onclick = () => {
+      const modal = document.getElementById('modal');
+      modal.querySelector('img').src = img.src;
+      modal.style.display = 'flex';
+    };
+  });
+  document.getElementById('modal').onclick = ()=> document.getElementById('modal').style.display = 'none';
+}
+
+function updateSummary(){
+  const sub = cart.reduce((s,i)=>s + (Number(i.price) || 0) * (i.qty || 1), 0);
+  let disc = 0;
+  if(coupon){
+    disc = coupon.type === 'fixed' ? coupon.amount : sub * (coupon.amount / 100);
+    if(disc > sub) disc = sub;
   }
+  document.getElementById('subtotal').textContent = `$${sub.toFixed(2)}`;
+  document.getElementById('discount').textContent = `-$${disc.toFixed(2)}`;
+  document.getElementById('total').textContent = `$${(sub - disc).toFixed(2)}`;
+  document.getElementById('coupon-info').textContent = appliedCode ? `Código aplicado: ${appliedCode}` : '';
+  save();
+}
 
-  function changeQty(i,delta){ cart[i].qty=Math.max(1,cart[i].qty+delta); save(); render(); }
-  function setQty(i,val){ cart[i].qty=Math.max(1,parseInt(val)||1); save(); render(); }
-  function removeItem(i){ cart.splice(i,1); save(); render(); showToast('Producto eliminado'); }
+/* cupones */
+document.getElementById('apply-coupon').onclick = () => {
+  const code = document.getElementById('coupon').value.trim().toUpperCase();
+  coupon = coupons[code] || null;
+  appliedCode = coupon ? code : null;
+  showToast(coupon ? 'Cupón aplicado' : 'Cupón inválido');
+  updateSummary();
+};
 
-  function bindEvents(){
-    document.querySelectorAll('.cart-item img').forEach(img=>{
-      img.onclick=()=>{
-        const modal=document.getElementById('modal');
-        modal.querySelector('img').src=img.src;
-        modal.style.display='flex';
-      };
-    });
-    document.getElementById('modal').onclick=()=>document.getElementById('modal').style.display='none';
-  }
+/* checkout -> WhatsApp */
+document.getElementById('checkout').onclick = () => {
+  if(!cart.length) return showToast('Carrito vacío');
+  const subValue = cart.reduce((s,i)=>s + (Number(i.price)||0) * (i.qty||1), 0);
+  const discValue = coupon ? (coupon.type === 'fixed' ? coupon.amount : subValue * (coupon.amount / 100)) : 0;
+  const totalValue = subValue - discValue;
 
-  function updateSummary(){
-    const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
-    let disc=0;
-    if(coupon){
-      disc=coupon.type==='fixed'?coupon.amount:sub*(coupon.amount/100);
-      if(disc>sub) disc=sub;
-    }
-    document.getElementById('subtotal').textContent=`$${sub.toFixed(2)}`;
-    document.getElementById('discount').textContent=`-$${disc.toFixed(2)}`;
-    document.getElementById('total').textContent=`$${(sub-disc).toFixed(2)}`;
-    const info=document.getElementById('coupon-info');
-    info.textContent=appliedCode?`Código aplicado: ${appliedCode}`:'';
-    save();
-  }
+  const paymentValue = document.getElementById('payment').value;
+  let paymentCategory = '';
+  if(['USD','CUP'].includes(paymentValue)) paymentCategory = 'Efectivo';
+  else if(['Transferencia CUP'].includes(paymentValue)) paymentCategory = 'Transferencia';
+  else paymentCategory = 'Pago en el Exterior';
 
-  document.getElementById('apply-coupon').onclick=()=>{
-    const code=document.getElementById('coupon').value.trim().toUpperCase();
-    coupon=coupons[code]||null;
-    appliedCode=coupon?code:null;
-    showToast(coupon?'Cupón aplicado':'Cupón inválido');
-    updateSummary();
-  };
+  const methodText = `${paymentCategory} - ${paymentValue}`;
+  const clientName = document.getElementById('cliente-nombre').value || '';
+  const phone = document.getElementById('cliente-telefono').value || '';
+  const addr = encodeURIComponent(document.getElementById('cliente-direccion').value || '');
+  const note = encodeURIComponent(document.getElementById('note').value || '');
+  const codeUsed = appliedCode || 'Ninguno';
+  const subText = `$${subValue.toFixed(2)}`;
+  const discText = `-$${discValue.toFixed(2)}`;
+  const totalText = `$${totalValue.toFixed(2)}`;
 
-  document.getElementById('checkout').onclick=()=>{
-    if(!cart.length) return showToast('Carrito vacío');
-    const subValue=cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const discValue=coupon?(coupon.type==='fixed'?coupon.amount:subValue*(coupon.amount/100)):0;
-    const totalValue=subValue-discValue;
-    const paymentValue=document.getElementById('payment').value;
-    let paymentCategory='';
-    if(['USD','CUP'].includes(paymentValue)) paymentCategory='Efectivo';
-    else if(['Transferencia CUP'].includes(paymentValue)) paymentCategory='Transferencia';
-    else paymentCategory='Pago en el Exterior';
-    const methodText=`${paymentCategory} - ${paymentValue}`;
-    const name=document.getElementById('cliente-nombre').value;
-    const phone=document.getElementById('cliente-telefono').value;
-    const addr=encodeURIComponent(document.getElementById('cliente-direccion').value);
-    const note=encodeURIComponent(document.getElementById('note').value);
-    const codeUsed=appliedCode||'Ninguno';
-    const subText=`$${subValue.toFixed(2)}`;
-    const discText=`-$${discValue.toFixed(2)}`;
-    const totalText=`$${totalValue.toFixed(2)}`;
-    const items=cart.map(i=>`• ${i.name} x${i.qty}`).join('%0A');
-    const msg=`*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${subText}%0A🏷 *Descuento:* ${discText}%0A💰 *Total:* ${totalText}%0A🎟 *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${methodText}%0A%0A👤 *Nombre:* ${encodeURIComponent(name)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
-    window.open(`https://wa.me/5353264753?text=${msg}`,'_blank');
-    showToast('Abriendo WhatsApp...');
-  };
+  const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
 
-  // Añadir productos desde URL
-  (function(){
-    const p=new URLSearchParams(window.location.search);
+  const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${subText}%0A🏷 *Descuento:* ${discText}%0A💰 *Total:* ${totalText}%0A🎟 *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${methodText}%0A%0A👤 *Nombre:* ${encodeURIComponent(clientName)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
+
+  window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
+  showToast('Abriendo WhatsApp...');
+};
+
+/* --- Añadir desde URL (método A) --- */
+(function(){
+  try {
+    const p = new URLSearchParams(window.location.search);
     if(p.has('producto')){
-      const name=p.get('producto');
-      const image=p.get('imagen')||'';
-      const description=p.get('descripcion')||'';
-      const price=parseFloat(p.get('precio'))||0;
-      const existing=cart.find(i=>i.name===name&&i.image===image&&i.description===description);
-      if(existing){ existing.qty+=1; existing.price=price; }
-      else cart.push({ name, price, image, description, qty:1 });
-      save(); render(); showToast('Producto añadido');
-    }
-  })();
+      const name = p.get('producto') || '';
+      const image = p.get('imagen') || '';
+      const description = p.get('descripcion') || '';
+      const price = parseFloat(p.get('precio')) || 0;
+      const link = p.get('link') || '';
 
-  render();
+      // Si ya existe mismo name+description+image+link => aumentar qty
+      const existing = cart.find(i =>
+        i.name === name &&
+        (i.description || '') === description &&
+        (i.image || '') === image &&
+        (i.link || '') === link
+      );
+      if(existing){
+        existing.qty = (existing.qty || 1) + 1;
+        existing.price = price;
+      } else {
+        cart.push({
+          name: name,
+          price: price,
+          image: image,
+          description: description,
+          qty: 1,
+          link: link,
+          option1: null,
+          option2: null
+        });
+      }
+      save();
+      render();
+      showToast('Producto añadido');
+      // limpiar parámetros (opcional) para evitar re-adding si refrescan
+      if(window.history && window.history.replaceState){
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+  } catch(e){
+    console.error('Error procesando parámetros de URL', e);
+  }
+})();
+
+render();
 </script>
 </body>
 </html>
