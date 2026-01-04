@@ -208,34 +208,68 @@ document.getElementById('apply-coupon').onclick = () => {
   updateSummary();
 };
 
-/* checkout -> WhatsApp */
+/* --- Checkout WhatsApp (REEMPLAZAR BLOQUE ACTUAL) --- */
 document.getElementById('checkout').onclick = () => {
-  if(!cart.length) return showToast('Carrito vacío');
-  const subValue = cart.reduce((s,i)=>s + (Number(i.price)||0) * (i.qty||1), 0);
-  const discValue = coupon ? (coupon.type === 'fixed' ? coupon.amount : subValue * (coupon.amount / 100)) : 0;
+  if (!cart.length) {
+    showToast('Carrito vacío');
+    return;
+  }
+
+  // Totales
+  const subValue = cart.reduce((s,i) => s + (Number(i.price)  0) * (i.qty  1), 0);
+  const discValue = coupon
+    ? (coupon.type === 'fixed' ? coupon.amount : subValue * (coupon.amount / 100))
+    : 0;
   const totalValue = subValue - discValue;
 
+  // Pago / cliente
   const paymentValue = document.getElementById('payment').value;
   let paymentCategory = '';
-  if(['USD','CUP'].includes(paymentValue)) paymentCategory = 'Efectivo';
-  else if(['Transferencia CUP'].includes(paymentValue)) paymentCategory = 'Transferencia';
+  if (['USD','CUP'].includes(paymentValue)) paymentCategory = 'Efectivo';
+  else if (paymentValue === 'Transferencia CUP') paymentCategory = 'Transferencia';
   else paymentCategory = 'Pago en el Exterior';
+  const methodText = ${paymentCategory} - ${paymentValue};
 
-  const methodText = `${paymentCategory} - ${paymentValue}`;
-  const clientName = document.getElementById('cliente-nombre').value || '';
-  const phone = document.getElementById('cliente-telefono').value || '';
-  const addr = encodeURIComponent(document.getElementById('cliente-direccion').value || '');
-  const note = encodeURIComponent(document.getElementById('note').value || '');
+  const clientName = (document.getElementById('cliente-nombre').value || '').trim();
+  const phone = (document.getElementById('cliente-telefono').value || '').trim();
+  const addr = (document.getElementById('cliente-direccion').value || '').trim();
+  const note = (document.getElementById('note').value || '').trim();
   const codeUsed = appliedCode || 'Ninguno';
-  const subText = `$${subValue.toFixed(2)}`;
-  const discText = `-$${discValue.toFixed(2)}`;
-  const totalText = `$${totalValue.toFixed(2)}`;
 
-  const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
+  // Construir líneas por producto, cada una con sus opciones (option1/option2) o description
+  const itemsLines = cart.map(i => {
+    // Prioriza option1/option2 si existen (objeto), si no usa i.description (string)
+    const parts = [];
+    if (i.option1 && i.option1.label && i.option1.value) parts.push(${i.option1.label}: ${i.option1.value});
+    if (i.option2 && i.option2.label && i.option2.value) parts.push(${i.option2.label}: ${i.option2.value});
+    if (!parts.length && i.description) parts.push(i.description);
 
-  const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${subText}%0A🏷 *Descuento:* ${discText}%0A💰 *Total:* ${totalText}%0A🎟 *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${methodText}%0A%0A👤 *Nombre:* ${encodeURIComponent(clientName)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
+    const extras = parts.length ? \n   ${parts.join(' / ')} : '';
+    return • ${i.name} x${i.qty}${extras};
+  });
 
-  window.open(`https://wa.me/5353264753?text=${msg}`, '_blank');
+  const itemsText = itemsLines.join('\n');
+
+  // Mensaje completo (con saltos de línea reales) y luego encodeURIComponent para la URL
+  const msg =
+*🛒 Pedido FitZone*
+
+${itemsText}
+
+🧾 Subtotal: ${'$' + subValue.toFixed(2)}
+🏷 Descuento: ${'-$' + discValue.toFixed(2)}
+💰 Total: ${'$' + totalValue.toFixed(2)}
+🎟 Código: ${codeUsed}
+💳 Pago: ${methodText}
+
+👤 Nombre: ${clientName}
+📞 Teléfono: ${phone}
+📍 Dirección: ${addr}
+📝 Nota: ${note};
+
+  // Abrir WhatsApp con mensaje encodeado
+  const waUrl = https://wa.me/5353264753?text=${encodeURIComponent(msg)};
+  window.open(waUrl, '_blank');
   showToast('Abriendo WhatsApp...');
 };
 
