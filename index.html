@@ -231,7 +231,19 @@ document.getElementById('checkout').onclick = () => {
   const discText = `-$${discValue.toFixed(2)}`;
   const totalText = `$${totalValue.toFixed(2)}`;
 
-  const items = cart.map(i => `• ${i.name} x${i.qty}`).join('%0A');
+  const items = cart.map(i => {
+  const desc = i.descripcion || '';
+  let talla = '';
+  let color = '';
+
+  if (desc.includes('/')) {
+    const parts = desc.split('/');
+    talla = parts[0]?.trim();
+    color = parts[1]?.trim();
+  }
+
+  return • ${i.name} x${i.qty}%0A  ${talla ? 🧩 ${talla} : ''}${talla && color ? ' | ' : ''}${color ? 🎨 ${color} : ''};
+}).join('%0A');
 
   const msg = `*🛒 Pedido FitZone*%0A%0A${items}%0A%0A🧾 *Subtotal:* ${subText}%0A🏷 *Descuento:* ${discText}%0A💰 *Total:* ${totalText}%0A🎟 *Código promocional:* ${codeUsed}%0A💳 *Pago:* ${methodText}%0A%0A👤 *Nombre:* ${encodeURIComponent(clientName)}%0A📞 *Teléfono:* ${encodeURIComponent(phone)}%0A📍 *Dirección:* ${addr}%0A📝 *Nota:* ${note}`;
 
