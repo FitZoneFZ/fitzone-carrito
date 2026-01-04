@@ -296,15 +296,15 @@ ${itemsText}
         existing.price = price;
       } else {
         cart.push({
-          name: name,
-          price: price,
-          image: image,
-          description: description,
-          qty: 1,
-          link: link,
-          option1: null,
-          option2: null
-        });
+    name: name,
+    price: price,
+    image: image,
+    description: description,
+    qty: 1,
+    link: link,
+    option1: talla,   // SERVICIOS / TALLA
+    option2: color    // SABOR / COLOR
+});
       }
       save();
       render();
